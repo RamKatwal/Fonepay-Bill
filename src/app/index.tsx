@@ -1,98 +1,130 @@
-import * as Device from 'expo-device';
-import { Platform, StyleSheet } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import React from 'react';
+import { View, Text, StyleSheet, Image } from 'react-native';
+import { useRouter } from 'expo-router';
+import { useAppContext } from '@/store/AppContext';
+import { Screen } from '@/components/layout/Screen';
+import { Button } from '@/components/ui/Button';
+import { Colors } from '@/constants/colors';
+import { Spacing } from '@/constants/spacing';
+import { Typography } from '@/constants/typography';
+import { Icon } from '@/components/ui/Icon';
 
-import { AnimatedIcon } from '@/components/animated-icon';
-import { HintRow } from '@/components/hint-row';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { WebBadge } from '@/components/web-badge';
-import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
+export default function EntryScreen() {
+  const router = useRouter();
+  const { isAuthenticated, isConsented } = useAppContext();
 
-function getDevMenuHint() {
-  if (Platform.OS === 'web') {
-    return <ThemedText type="small">use browser devtools</ThemedText>;
-  }
-  if (Device.isDevice) {
-    return (
-      <ThemedText type="small">
-        shake device or press <ThemedText type="code">m</ThemedText> in terminal
-      </ThemedText>
-    );
-  }
-  const shortcut = Platform.OS === 'android' ? 'cmd+m (or ctrl+m)' : 'cmd+d';
+  const handleGetStarted = () => {
+    if (isAuthenticated) {
+      router.replace('/dashboard' as any);
+    } else if (isConsented) {
+      router.replace('/onboarding/authenticated');
+    } else {
+      router.push('/onboarding/consent');
+    }
+  };
+
   return (
-    <ThemedText type="small">
-      press <ThemedText type="code">{shortcut}</ThemedText>
-    </ThemedText>
-  );
-}
+    <Screen
+      scrollable={false}
+      style={styles.container}
+      footer={
+        <Button
+          title={isAuthenticated ? 'Go to Dashboard' : 'Get Started with Fonepay'}
+          onPress={handleGetStarted}
+          size="lg"
+          rightIcon={<Icon name="arrow-forward" size={20} color={Colors.textInverse} />}
+        />
+      }>
+      <View style={styles.centerContent}>
+        {/* Fonepay Badge / Brand Mark */}
+        <View style={styles.brandIconContainer}>
+          <Icon name="receipt" size={48} color={Colors.primary} />
+        </View>
 
-export default function HomeScreen() {
-  return (
-    <ThemedView style={styles.container}>
-      <SafeAreaView style={styles.safeArea}>
-        <ThemedView style={styles.heroSection}>
-          <AnimatedIcon />
-          <ThemedText type="title" style={styles.title}>
-            Welcome to&nbsp;Expo
-          </ThemedText>
-        </ThemedView>
+        <Text style={styles.appName}>Fonepay</Text>
+        <Text style={styles.productTitle}>Digital Bill Generator</Text>
+        <Text style={styles.tagline}>Create Bill • Get Paid • Share</Text>
 
-        <ThemedText type="code" style={styles.code}>
-          get started
-        </ThemedText>
-
-        <ThemedView type="backgroundElement" style={styles.stepContainer}>
-          <HintRow
-            title="Try editing"
-            hint={<ThemedText type="code">src/app/index.tsx</ThemedText>}
-          />
-          <HintRow title="Dev tools" hint={getDevMenuHint()} />
-          <HintRow
-            title="Fresh start"
-            hint={<ThemedText type="code">npm run reset-project</ThemedText>}
-          />
-        </ThemedView>
-
-        {Platform.OS === 'web' && <WebBadge />}
-      </SafeAreaView>
-    </ThemedView>
+        <View style={styles.featurePills}>
+          <View style={styles.pill}>
+            <Icon name="checkmark-circle" size={16} color={Colors.success} />
+            <Text style={styles.pillText}>Instant Sales Bills</Text>
+          </View>
+          <View style={styles.pill}>
+            <Icon name="qr-code-outline" size={16} color={Colors.primary} />
+            <Text style={styles.pillText}>Fonepay QR & Cash</Text>
+          </View>
+          <View style={styles.pill}>
+            <Icon name="share-social-outline" size={16} color={Colors.cash} />
+            <Text style={styles.pillText}>Fast Digital Sharing</Text>
+          </View>
+        </View>
+      </View>
+    </Screen>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
     justifyContent: 'center',
-    flexDirection: 'row',
-  },
-  safeArea: {
-    flex: 1,
-    paddingHorizontal: Spacing.four,
     alignItems: 'center',
-    gap: Spacing.three,
-    paddingBottom: BottomTabInset + Spacing.three,
-    maxWidth: MaxContentWidth,
+    padding: Spacing.xl,
   },
-  heroSection: {
+  centerContent: {
     alignItems: 'center',
     justifyContent: 'center',
-    flex: 1,
-    paddingHorizontal: Spacing.four,
-    gap: Spacing.four,
+    maxWidth: 360,
   },
-  title: {
-    textAlign: 'center',
+  brandIconContainer: {
+    width: 96,
+    height: 96,
+    borderRadius: 48,
+    backgroundColor: Colors.primaryMuted,
+    borderWidth: 2,
+    borderColor: Colors.primarySubtle,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: Spacing.xl,
   },
-  code: {
+  appName: {
+    fontSize: Typography.size.sm,
+    fontWeight: Typography.weight.bold,
+    color: Colors.primary,
     textTransform: 'uppercase',
+    letterSpacing: 2,
+    marginBottom: Spacing.xs,
   },
-  stepContainer: {
-    gap: Spacing.three,
-    alignSelf: 'stretch',
-    paddingHorizontal: Spacing.three,
-    paddingVertical: Spacing.four,
-    borderRadius: Spacing.four,
+  productTitle: {
+    fontSize: Typography.size.xxl,
+    fontWeight: Typography.weight.heavy,
+    color: Colors.text,
+    textAlign: 'center',
+    marginBottom: Spacing.xs,
+  },
+  tagline: {
+    fontSize: Typography.size.sm,
+    color: Colors.textSecondary,
+    textAlign: 'center',
+    marginBottom: Spacing.xxxl,
+  },
+  featurePills: {
+    gap: Spacing.sm,
+    width: '100%',
+  },
+  pill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: Colors.surface,
+    paddingVertical: Spacing.md,
+    paddingHorizontal: Spacing.lg,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    gap: Spacing.md,
+  },
+  pillText: {
+    fontSize: Typography.size.sm,
+    fontWeight: Typography.weight.medium,
+    color: Colors.text,
   },
 });
