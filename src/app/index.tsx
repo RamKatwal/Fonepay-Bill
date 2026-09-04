@@ -1,130 +1,85 @@
-import React from 'react';
-import { View, Text, StyleSheet, Image } from 'react-native';
+import { Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
-import { useAppContext } from '@/store/AppContext';
 import { Screen } from '@/components/layout/Screen';
-import { Button } from '@/components/ui/Button';
-import { Colors } from '@/constants/colors';
-import { Spacing } from '@/constants/spacing';
-import { Typography } from '@/constants/typography';
+import { Card } from '@/components/ui/Card';
 import { Icon } from '@/components/ui/Icon';
+import { spacing } from '@/constants/spacing';
+import { radius } from '@/constants/radius';
+import { typography } from '@/constants/typography';
+import { makeStyles, useTheme } from '@/theme';
+import { useTransactions } from '@/hooks/useTransactions';
 
-export default function EntryScreen() {
+export default function FoldersScreen() {
   const router = useRouter();
-  const { isAuthenticated, isConsented } = useAppContext();
+  const styles = useStyles();
+  const t = useTheme();
+  const { totalCount } = useTransactions();
 
-  const handleGetStarted = () => {
-    if (isAuthenticated) {
-      router.replace('/dashboard' as any);
-    } else if (isConsented) {
-      router.replace('/onboarding/authenticated');
-    } else {
-      router.push('/onboarding/consent');
-    }
+  const handleOpenQuickbill = () => {
+    router.push('/dashboard' as any);
   };
 
   return (
-    <Screen
-      scrollable={false}
-      style={styles.container}
-      footer={
-        <Button
-          title={isAuthenticated ? 'Go to Dashboard' : 'Get Started with Fonepay'}
-          onPress={handleGetStarted}
-          size="lg"
-          rightIcon={<Icon name="arrow-forward" size={20} color={Colors.textInverse} />}
-        />
-      }>
-      <View style={styles.centerContent}>
-        {/* Fonepay Badge / Brand Mark */}
-        <View style={styles.brandIconContainer}>
-          <Icon name="receipt" size={48} color={Colors.primary} />
-        </View>
+    <Screen headerProps={{ title: 'Bills' }}>
+      <Text style={styles.sectionLabel}>Folders</Text>
 
-        <Text style={styles.appName}>Fonepay</Text>
-        <Text style={styles.productTitle}>Digital Bill Generator</Text>
-        <Text style={styles.tagline}>Create Bill • Get Paid • Share</Text>
-
-        <View style={styles.featurePills}>
-          <View style={styles.pill}>
-            <Icon name="checkmark-circle" size={16} color={Colors.success} />
-            <Text style={styles.pillText}>Instant Sales Bills</Text>
+      <Card
+        variant="surface"
+        padding="md"
+        style={styles.folderCard}
+        onPress={handleOpenQuickbill}>
+        <View style={styles.folderRow}>
+          <View style={styles.folderIcon}>
+            <Icon name="folder-outline" size={22} color={t.text.secondary} />
           </View>
-          <View style={styles.pill}>
-            <Icon name="qr-code-outline" size={16} color={Colors.primary} />
-            <Text style={styles.pillText}>Fonepay QR & Cash</Text>
+          <View style={styles.folderText}>
+            <Text style={styles.folderName} numberOfLines={1}>
+              Quickbill
+            </Text>
+            <Text style={styles.folderMeta} numberOfLines={1}>
+              {totalCount} {totalCount === 1 ? 'bill' : 'bills'}
+            </Text>
           </View>
-          <View style={styles.pill}>
-            <Icon name="share-social-outline" size={16} color={Colors.cash} />
-            <Text style={styles.pillText}>Fast Digital Sharing</Text>
-          </View>
+          <Icon name="chevron-forward" size={18} color={t.text.muted} />
         </View>
-      </View>
+      </Card>
     </Screen>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: Spacing.xl,
+const useStyles = makeStyles((t) => ({
+  sectionLabel: {
+    ...typography.label,
+    color: t.text.secondary,
+    marginBottom: spacing.md,
   },
-  centerContent: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    maxWidth: 360,
+  folderCard: {
+    marginBottom: spacing.md,
   },
-  brandIconContainer: {
-    width: 96,
-    height: 96,
-    borderRadius: 48,
-    backgroundColor: Colors.primaryMuted,
-    borderWidth: 2,
-    borderColor: Colors.primarySubtle,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: Spacing.xl,
-  },
-  appName: {
-    fontSize: Typography.size.sm,
-    fontWeight: Typography.weight.bold,
-    color: Colors.primary,
-    textTransform: 'uppercase',
-    letterSpacing: 2,
-    marginBottom: Spacing.xs,
-  },
-  productTitle: {
-    fontSize: Typography.size.xxl,
-    fontWeight: Typography.weight.heavy,
-    color: Colors.text,
-    textAlign: 'center',
-    marginBottom: Spacing.xs,
-  },
-  tagline: {
-    fontSize: Typography.size.sm,
-    color: Colors.textSecondary,
-    textAlign: 'center',
-    marginBottom: Spacing.xxxl,
-  },
-  featurePills: {
-    gap: Spacing.sm,
-    width: '100%',
-  },
-  pill: {
+  folderRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.surface,
-    paddingVertical: Spacing.md,
-    paddingHorizontal: Spacing.lg,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    gap: Spacing.md,
+    gap: spacing.md,
   },
-  pillText: {
-    fontSize: Typography.size.sm,
-    fontWeight: Typography.weight.medium,
-    color: Colors.text,
+  folderIcon: {
+    width: 44,
+    height: 44,
+    borderRadius: radius.medium,
+    backgroundColor: t.background.subtle,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-});
+  folderText: {
+    flex: 1,
+  },
+  folderName: {
+    ...typography.cardTitle,
+    fontSize: 16,
+    color: t.text.primary,
+    marginBottom: 2,
+  },
+  folderMeta: {
+    ...typography.caption,
+    color: t.text.muted,
+  },
+}));

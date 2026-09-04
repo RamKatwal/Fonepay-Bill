@@ -2,12 +2,10 @@ import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { Sale } from '@/types/sale';
 import { Merchant } from '@/types/merchant';
-import { Card } from '@/components/ui/Card';
-import { Badge } from '@/components/ui/Badge';
-import { Divider } from '@/components/ui/Divider';
-import { Colors } from '@/constants/colors';
-import { Spacing, BorderRadius } from '@/constants/spacing';
-import { Typography } from '@/constants/typography';
+import { Spacing } from '@/constants/spacing';
+import { radius } from '@/constants/radius';
+import { typography, Typography } from '@/constants/typography';
+import { makeStyles, useTheme } from '@/theme';
 import { formatNPR } from '@/utils/currency';
 import { formatPAN } from '@/utils/formatters';
 
@@ -18,352 +16,315 @@ interface BillPreviewProps {
 }
 
 export function BillPreview({ sale, merchant, isOfficial = false }: BillPreviewProps) {
+  const styles = useStyles();
+  const t = useTheme();
+
+  const pct =
+    sale.discount > 0 && sale.subtotal > 0
+      ? Math.round((sale.discount / sale.subtotal) * 100)
+      : 0;
+
+  const methodLabel =
+    sale.paymentMode === 'fonepay' ? 'Fonepay QR' : sale.paymentMode === 'cash' ? 'Cash' : '—';
+
   return (
-    <Card variant="surface" style={styles.billContainer}>
-      {/* Official Tax Invoice Header / Preview Banner */}
-      <View style={styles.headerBanner}>
-        <Text style={styles.bannerText}>
-          {isOfficial ? 'TAX INVOICE' : 'BILL PREVIEW (ESTIMATE)'}
-        </Text>
-      </View>
-
-      {/* Merchant Header (Read-Only) */}
-      <View style={styles.merchantSection}>
-        <Text style={styles.businessName}>{merchant.businessName}</Text>
-        <Text style={styles.merchantDetail}>{merchant.address}</Text>
-        <Text style={styles.merchantDetail}>Contact: {merchant.contactNumber}</Text>
-        <View style={styles.panRow}>
-          <Text style={styles.panLabel}>PAN / VAT No:</Text>
-          <Text style={styles.panValue}>{formatPAN(merchant.panVatNumber)}</Text>
-        </View>
-      </View>
-
-      <Divider dashed style={styles.divider} />
-
-      {/* Bill Meta Data */}
-      <View style={styles.metaGrid}>
-        <View style={styles.metaCol}>
-          <Text style={styles.metaLabel}>Invoice No:</Text>
-          <Text style={styles.metaValueBold}>{sale.invoiceNumber}</Text>
-        </View>
-        <View style={styles.metaColRight}>
-          <Text style={styles.metaLabel}>Date:</Text>
-          <Text style={styles.metaValue}>{sale.invoiceDate}</Text>
-        </View>
-      </View>
-
-      <View style={styles.metaGrid}>
-        <View style={styles.metaCol}>
-          <Text style={styles.metaLabel}>Txn ID:</Text>
-          <Text style={styles.metaValueMono}>{sale.transactionId}</Text>
-        </View>
-        <View style={styles.metaColRight}>
-          <Text style={styles.metaLabel}>Time:</Text>
-          <Text style={styles.metaValue}>{sale.invoiceTime}</Text>
-        </View>
-      </View>
-
-      {sale.paymentMode && (
-        <View style={styles.paymentStatusRow}>
-          <Text style={styles.metaLabel}>Payment Mode:</Text>
-          <View style={styles.badgeWrap}>
-            <Badge status={sale.paymentMode} size="sm" />
-            {sale.paymentStatus && <Badge status={sale.paymentStatus} size="sm" />}
-          </View>
-        </View>
-      )}
-
-      <Divider style={styles.divider} />
-
-      {/* Items Table */}
-      <View style={styles.tableHeader}>
-        <Text style={[styles.thText, styles.colSn]}>SN</Text>
-        <Text style={[styles.thText, styles.colPart]}>Particulars</Text>
-        <Text style={[styles.thText, styles.colQty]}>Qty</Text>
-        <Text style={[styles.thText, styles.colRate]}>Rate</Text>
-        <Text style={[styles.thText, styles.colAmt]}>Amount</Text>
-      </View>
-
-      <View style={styles.tableBody}>
-        {sale.items.map((item, idx) => (
-          <View key={item.id} style={styles.tableRow}>
-            <Text style={[styles.tdText, styles.colSn]}>{idx + 1}</Text>
-            <Text style={[styles.tdTextBold, styles.colPart]} numberOfLines={2}>
-              {item.particulars}
-            </Text>
-            <Text style={[styles.tdText, styles.colQty]}>{item.quantity}</Text>
-            <Text style={[styles.tdText, styles.colRate]}>{item.rate}</Text>
-            <Text style={[styles.tdTextBold, styles.colAmt]}>
-              {formatNPR(item.amount)}
+    <View style={styles.card}>
+      {/* Header */}
+      <View style={styles.header}>
+        <View style={styles.headerRow}>
+          <View style={styles.merchantCol}>
+            <Text style={styles.merchantName}>{merchant.businessName}</Text>
+            <Text style={styles.merchantMeta}>{merchant.address}</Text>
+            <Text style={styles.merchantMeta}>
+              PAN {formatPAN(merchant.panVatNumber)} · {merchant.contactNumber}
             </Text>
           </View>
-        ))}
+          <View style={styles.headerRight}>
+            <Text style={styles.docLabel}>{isOfficial ? 'Tax Invoice' : 'Estimate'}</Text>
+          </View>
+        </View>
+
+        <View style={styles.metaRow}>
+          <View style={styles.metaCol}>
+            <Text style={styles.metaLabel}>Invoice</Text>
+            <Text style={styles.metaMono}>{sale.invoiceNumber || '—'}</Text>
+          </View>
+          <View style={styles.metaCol}>
+            <Text style={styles.metaLabel}>Date</Text>
+            <Text style={styles.metaValue}>{sale.invoiceDate}</Text>
+          </View>
+          <View style={styles.metaCol}>
+            <Text style={styles.metaLabel}>Time</Text>
+            <Text style={styles.metaValue}>{sale.invoiceTime}</Text>
+          </View>
+        </View>
       </View>
 
-      <Divider style={styles.divider} />
+      {/* Items table */}
+      <View style={styles.tableHead}>
+        <Text style={[styles.th, styles.colName]}>Particulars</Text>
+        <Text style={[styles.th, styles.colQty]}>Qty</Text>
+        <Text style={[styles.th, styles.colRate]}>Rate</Text>
+        <Text style={[styles.th, styles.colAmt]}>Amount</Text>
+      </View>
+      {sale.items.map((item) => (
+        <View key={item.id} style={styles.tableRow}>
+          <Text style={[styles.tdName, styles.colName]}>{item.particulars}</Text>
+          <Text style={[styles.td, styles.colQty]}>{item.quantity}</Text>
+          <Text style={[styles.td, styles.colRate]}>{formatNPR(item.rate)}</Text>
+          <Text style={[styles.tdStrong, styles.colAmt]}>{formatNPR(item.amount)}</Text>
+        </View>
+      ))}
 
-      {/* Totals & Calculations */}
-      <View style={styles.totalsContainer}>
-        <View style={styles.totalRow}>
+      {/* Totals */}
+      <View style={styles.totals}>
+        <View style={styles.totalLine}>
           <Text style={styles.totalLabel}>Subtotal</Text>
           <Text style={styles.totalValue}>{formatNPR(sale.subtotal)}</Text>
         </View>
-
         {sale.discount > 0 && (
-          <View style={styles.totalRow}>
-            <Text style={styles.discountLabel}>Discount</Text>
-            <Text style={styles.discountValue}>- {formatNPR(sale.discount)}</Text>
+          <View style={styles.totalLine}>
+            <Text style={styles.totalLabel}>
+              Discount{pct > 0 ? ` (${pct}%)` : ''}
+            </Text>
+            <Text style={[styles.totalValue, { color: t.status.success }]}>
+              − {formatNPR(sale.discount)}
+            </Text>
           </View>
         )}
-
-        <View style={styles.netAmountRow}>
-          <Text style={styles.netLabel}>Net Amount</Text>
+        <View style={styles.totalDivider} />
+        <View style={styles.totalLine}>
+          <Text style={styles.netLabel}>Net amount</Text>
           <Text style={styles.netValue}>{formatNPR(sale.netAmount)}</Text>
+        </View>
+        <View style={styles.wordsBox}>
+          <Text style={styles.wordsText}>
+            In words: <Text style={styles.wordsStrong}>{sale.amountInWords}</Text>
+          </Text>
         </View>
       </View>
 
-      {/* In Words Section */}
-      <View style={styles.inWordsBox}>
-        <Text style={styles.inWordsLabel}>In Words:</Text>
-        <Text style={styles.inWordsText}>{sale.amountInWords}</Text>
+      {/* Footer */}
+      <View style={styles.footer}>
+        <View style={styles.footerLeft}>
+          <Text style={styles.metaLabel}>Payment</Text>
+          <Text style={styles.methodLabel}>
+            {sale.paymentMode ? methodLabel : 'Not selected'}
+          </Text>
+          {isOfficial && sale.paymentMode === 'fonepay' && sale.transactionId ? (
+            <Text style={styles.txnMono}>Txn {sale.transactionId}</Text>
+          ) : null}
+        </View>
+        <Text style={styles.footerNote}>Generated on Fonepay Digital Bill</Text>
       </View>
-
-      {/* Footer Notes */}
-      <View style={styles.billFooter}>
-        <Text style={styles.footerNote}>Generated via Fonepay Digital Bill Generator</Text>
-        <Text style={styles.thankYouNote}>Thank you for your business!</Text>
-      </View>
-    </Card>
+    </View>
   );
 }
 
-const styles = StyleSheet.create({
-  billContainer: {
-    padding: Spacing.lg,
-    backgroundColor: Colors.surface,
-    borderRadius: BorderRadius.lg,
+const useStyles = makeStyles((t) => ({
+  card: {
+    backgroundColor: t.background.surface,
     borderWidth: 1,
-    borderColor: Colors.border,
+    borderColor: t.border.default,
+    borderRadius: radius.card,
+    overflow: 'hidden',
   },
-  headerBanner: {
-    backgroundColor: Colors.surfaceSubtle,
-    paddingVertical: 6,
-    borderRadius: BorderRadius.xs,
-    alignItems: 'center',
-    marginBottom: Spacing.md,
+  header: {
+    padding: Spacing.lg,
+    borderBottomWidth: 1,
+    borderBottomColor: t.border.default,
+    borderStyle: 'dashed',
+    gap: Spacing.md,
   },
-  bannerText: {
-    fontSize: Typography.size.xs,
-    fontWeight: Typography.weight.bold,
-    color: Colors.textSecondary,
-    letterSpacing: 1.5,
-  },
-  merchantSection: {
-    alignItems: 'center',
-    marginBottom: Spacing.xs,
-  },
-  businessName: {
-    fontSize: Typography.size.md,
-    fontWeight: Typography.weight.heavy,
-    color: Colors.text,
-    textAlign: 'center',
-    marginBottom: 2,
-  },
-  merchantDetail: {
-    fontSize: Typography.size.xs,
-    color: Colors.textSecondary,
-    textAlign: 'center',
-    marginBottom: 2,
-  },
-  panRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: 4,
-    gap: 4,
-  },
-  panLabel: {
-    fontSize: Typography.size.xs,
-    color: Colors.textMuted,
-  },
-  panValue: {
-    fontSize: Typography.size.xs,
-    fontWeight: Typography.weight.bold,
-    color: Colors.text,
-  },
-  divider: {
-    marginVertical: Spacing.sm,
-  },
-  metaGrid: {
+  headerRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 4,
+    alignItems: 'flex-start',
+    gap: Spacing.md,
+  },
+  merchantCol: {
+    flex: 1,
+    gap: 3,
+  },
+  merchantName: {
+    ...typography.cardTitle,
+    fontSize: 17,
+    fontFamily: Typography.family.sansHeavy,
+    fontWeight: '800',
+    color: t.text.primary,
+  },
+  merchantMeta: {
+    ...typography.caption,
+    color: t.text.secondary,
+    lineHeight: 16,
+  },
+  headerRight: {
+    alignItems: 'flex-end',
+  },
+  docLabel: {
+    ...typography.label,
+    fontSize: 10,
+    color: t.text.secondary,
+    textTransform: 'uppercase',
+    letterSpacing: 0.6,
+  },
+  metaRow: {
+    flexDirection: 'row',
+    gap: Spacing.xxl,
   },
   metaCol: {
-    flexDirection: 'row',
-    gap: 4,
-  },
-  metaColRight: {
-    flexDirection: 'row',
-    gap: 4,
+    gap: 2,
   },
   metaLabel: {
-    fontSize: Typography.size.xs,
-    color: Colors.textMuted,
+    ...typography.label,
+    fontSize: 10,
+    color: t.text.muted,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+  metaMono: {
+    ...typography.invoiceNumber,
+    fontFamily: Typography.family.mono,
+    color: t.text.primary,
   },
   metaValue: {
-    fontSize: Typography.size.xs,
-    color: Colors.text,
+    ...typography.caption,
+    fontWeight: '500',
+    color: t.text.primary,
   },
-  metaValueBold: {
-    fontSize: Typography.size.xs,
-    fontWeight: Typography.weight.bold,
-    color: Colors.text,
-  },
-  metaValueMono: {
-    fontSize: Typography.size.xs,
-    fontFamily: 'monospace',
-    color: Colors.textSecondary,
-  },
-  paymentStatusRow: {
+  tableHead: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginTop: 4,
+    backgroundColor: t.background.subtle,
+    paddingVertical: 10,
+    paddingHorizontal: Spacing.lg,
   },
-  badgeWrap: {
-    flexDirection: 'row',
-    gap: 4,
-  },
-  tableHeader: {
-    flexDirection: 'row',
-    backgroundColor: Colors.surfaceSubtle,
-    paddingVertical: 6,
-    paddingHorizontal: 4,
-    borderRadius: BorderRadius.xs,
-    marginBottom: 4,
-  },
-  thText: {
-    fontSize: Typography.size.xxs,
-    fontWeight: Typography.weight.bold,
-    color: Colors.textSecondary,
+  th: {
+    ...typography.label,
+    fontSize: 10,
+    color: t.text.secondary,
     textTransform: 'uppercase',
-  },
-  tableBody: {
-    gap: 6,
+    letterSpacing: 0.5,
   },
   tableRow: {
     flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 4,
-    paddingHorizontal: 4,
+    paddingVertical: 12,
+    paddingHorizontal: Spacing.lg,
+    borderBottomWidth: 1,
+    borderBottomColor: t.border.subtle,
+    alignItems: 'baseline',
   },
-  tdText: {
-    fontSize: Typography.size.xs,
-    color: Colors.textSecondary,
+  td: {
+    ...typography.bodySmall,
+    color: t.text.secondary,
+    fontVariant: ['tabular-nums'],
   },
-  tdTextBold: {
-    fontSize: Typography.size.xs,
-    fontWeight: Typography.weight.semibold,
-    color: Colors.text,
+  tdName: {
+    ...typography.bodySmall,
+    fontWeight: '500',
+    color: t.text.primary,
+    lineHeight: 18,
   },
-  colSn: {
-    width: 24,
+  tdStrong: {
+    ...typography.bodySmall,
+    fontWeight: '600',
+    color: t.text.primary,
+    fontVariant: ['tabular-nums'],
   },
-  colPart: {
+  colName: {
     flex: 1,
-    paddingRight: 4,
+    paddingRight: 8,
   },
   colQty: {
-    width: 36,
-    textAlign: 'center',
+    width: 30,
+    textAlign: 'right',
   },
   colRate: {
-    width: 50,
+    width: 72,
     textAlign: 'right',
   },
   colAmt: {
-    width: 68,
+    width: 82,
     textAlign: 'right',
   },
-  totalsContainer: {
-    marginTop: 4,
-    gap: 4,
+  totals: {
+    padding: Spacing.lg,
+    gap: 8,
   },
-  totalRow: {
+  totalLine: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
+    alignItems: 'baseline',
   },
   totalLabel: {
-    fontSize: Typography.size.xs,
-    color: Colors.textSecondary,
+    ...typography.bodySmall,
+    color: t.text.secondary,
   },
   totalValue: {
-    fontSize: Typography.size.xs,
-    fontWeight: Typography.weight.semibold,
-    color: Colors.text,
+    ...typography.bodySmall,
+    fontWeight: '500',
+    color: t.text.primary,
+    fontVariant: ['tabular-nums'],
   },
-  discountLabel: {
-    fontSize: Typography.size.xs,
-    color: Colors.failed,
-  },
-  discountValue: {
-    fontSize: Typography.size.xs,
-    fontWeight: Typography.weight.semibold,
-    color: Colors.failed,
-  },
-  netAmountRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingTop: Spacing.xs,
-    borderTopWidth: 1,
-    borderTopColor: Colors.border,
-    marginTop: 4,
+  totalDivider: {
+    height: 1,
+    backgroundColor: t.border.default,
+    marginVertical: 2,
   },
   netLabel: {
-    fontSize: Typography.size.sm,
-    fontWeight: Typography.weight.bold,
-    color: Colors.text,
+    ...typography.sectionTitle,
+    fontSize: 14,
+    color: t.text.primary,
   },
   netValue: {
-    fontSize: Typography.size.md,
-    fontWeight: Typography.weight.heavy,
-    color: Colors.primary,
+    ...typography.amountLarge,
+    fontSize: 22,
+    color: t.text.primary,
   },
-  inWordsBox: {
-    backgroundColor: Colors.surfaceSubtle,
-    padding: Spacing.sm,
-    borderRadius: BorderRadius.xs,
-    marginTop: Spacing.md,
+  wordsBox: {
+    backgroundColor: t.background.subtle,
+    borderRadius: radius.small,
+    padding: Spacing.md,
+    marginTop: 4,
   },
-  inWordsLabel: {
-    fontSize: Typography.size.xxs,
-    color: Colors.textMuted,
-    textTransform: 'uppercase',
-    marginBottom: 2,
+  wordsText: {
+    ...typography.caption,
+    fontSize: 11,
+    color: t.text.secondary,
+    lineHeight: 16,
   },
-  inWordsText: {
-    fontSize: Typography.size.xs,
-    fontWeight: Typography.weight.medium,
-    color: Colors.text,
-    fontStyle: 'italic',
+  wordsStrong: {
+    fontWeight: '600',
+    color: t.text.primary,
   },
-  billFooter: {
-    alignItems: 'center',
-    marginTop: Spacing.lg,
-    paddingTop: Spacing.sm,
+  footer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-end',
+    gap: Spacing.md,
+    padding: Spacing.lg,
     borderTopWidth: 1,
-    borderTopColor: Colors.borderSubtle,
+    borderTopColor: t.border.default,
+  },
+  footerLeft: {
+    gap: 3,
+  },
+  methodLabel: {
+    ...typography.bodySmall,
+    fontWeight: '600',
+    color: t.text.primary,
+  },
+  txnMono: {
+    ...typography.invoiceNumber,
+    fontFamily: Typography.family.mono,
+    fontSize: 11,
+    color: t.text.secondary,
   },
   footerNote: {
-    fontSize: Typography.size.xxs,
-    color: Colors.textMuted,
-    marginBottom: 2,
+    ...typography.caption,
+    fontSize: 10,
+    color: t.text.muted,
+    textAlign: 'right',
+    maxWidth: 150,
+    lineHeight: 14,
   },
-  thankYouNote: {
-    fontSize: Typography.size.xs,
-    fontWeight: Typography.weight.semibold,
-    color: Colors.textSecondary,
-  },
-});
+}));

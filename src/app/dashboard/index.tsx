@@ -1,23 +1,23 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, TouchableOpacity } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useAppContext } from '@/store/AppContext';
 import { useSaleContext } from '@/store/SaleContext';
 import { useTransactions } from '@/hooks/useTransactions';
 import { Screen } from '@/components/layout/Screen';
-import { Header } from '@/components/layout/Header';
 import { PrimaryButton } from '@/components/ui/Button';
 import { IconButton } from '@/components/ui/IconButton';
 import { Icon } from '@/components/ui/Icon';
-import { MerchantInfoCard } from '@/components/merchant/MerchantInfoCard';
 import { SalesSummaryCard } from '@/components/sales/SalesSummaryCard';
 import { TransactionCard } from '@/components/history/TransactionCard';
-import { colors } from '@/constants/colors';
 import { spacing } from '@/constants/spacing';
 import { typography } from '@/constants/typography';
+import { makeStyles, useTheme } from '@/theme';
 
 export default function DashboardScreen() {
   const router = useRouter();
+  const styles = useStyles();
+  const t = useTheme();
   const { merchant } = useAppContext();
   const { initNewSale } = useSaleContext();
   const { recentTransactions, todaySummary } = useTransactions();
@@ -42,31 +42,28 @@ export default function DashboardScreen() {
   return (
     <Screen
       headerProps={{
-        title: 'Merchant Dashboard',
+        title: 'Dashboard',
         subtitle: merchant.businessName,
+        showBack: true,
         rightAction: (
           <IconButton
             icon="person-circle-outline"
             size={40}
             iconSize={26}
-            color={colors.brand.primary}
+            color={t.text.primary}
             onPress={handleOpenProfile}
-            accessibilityLabel="Merchant Profile"
+            accessibilityLabel="Merchant profile"
           />
         ),
       }}
       footer={
         <PrimaryButton
-          title="Create Sales"
+          title="Create sale"
           onPress={handleCreateSales}
           size="lg"
-          leftIcon={<Icon name="add" size={24} color={colors.text.inverse} />}
+          leftIcon={<Icon name="add" size={22} color={t.text.inverse} />}
         />
       }>
-      {/* 1. Verified Merchant Info Card (Read-only Fonepay pattern) */}
-      <MerchantInfoCard merchant={merchant} compact style={styles.cardSpacing} />
-
-      {/* 2. Today's Financial Sales Summary Card */}
       <SalesSummaryCard
         totalVolume={todaySummary.totalVolume}
         totalSalesCount={todaySummary.totalSalesCount}
@@ -75,21 +72,19 @@ export default function DashboardScreen() {
         style={styles.cardSpacing}
       />
 
-      {/* 3. Section Header for Recent Sales */}
       <View style={styles.sectionHeader}>
-        <Text style={styles.sectionTitle}>Recent Sales (Latest 10)</Text>
+        <Text style={styles.sectionTitle}>Recent sales</Text>
         <TouchableOpacity
           activeOpacity={0.7}
           onPress={handleViewAllHistory}
           style={styles.viewAllButton}
           accessibilityRole="button"
-          accessibilityLabel="View All Sales History">
-          <Text style={styles.viewAllText}>View All History</Text>
-          <Icon name="chevron-forward" size={16} color={colors.brand.primary} />
+          accessibilityLabel="View all sales history">
+          <Text style={styles.viewAllText}>View all</Text>
+          <Icon name="chevron-forward" size={15} color={t.brand.primary} />
         </TouchableOpacity>
       </View>
 
-      {/* 4. Recent Transactions List using TransactionCard pattern */}
       <View style={styles.transactionsList}>
         {recentTransactions.map((tx) => (
           <TransactionCard
@@ -103,7 +98,7 @@ export default function DashboardScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((t) => ({
   cardSpacing: {
     marginBottom: spacing.lg,
   },
@@ -116,7 +111,7 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     ...typography.sectionTitle,
-    color: colors.text.primary,
+    color: t.text.primary,
   },
   viewAllButton: {
     flexDirection: 'row',
@@ -126,10 +121,11 @@ const styles = StyleSheet.create({
   },
   viewAllText: {
     ...typography.bodyMedium,
-    fontWeight: '600',
-    color: colors.brand.primary,
+    fontWeight: '700',
+    color: t.brand.primary,
+    textDecorationLine: 'underline',
   },
   transactionsList: {
     gap: spacing.sm,
   },
-});
+}));

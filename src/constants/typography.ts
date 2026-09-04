@@ -1,56 +1,59 @@
-import { TextStyle, Platform } from 'react-native';
-
-const monoFont = Platform.select({
-  ios: 'Menlo',
-  android: 'monospace',
-  web: 'SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace',
-  default: 'monospace',
-});
+import { TextStyle } from 'react-native';
+import { jakarta, plexMono } from '@/theme/fonts';
 
 /**
- * Named Typography Styles adhering to fintech visual hierarchy
+ * Fonepay type scale — Plus Jakarta Sans (the documented Cereal substitute),
+ * IBM Plex Mono for invoice numbers and transaction IDs. Weights are carried by
+ * the font family itself (custom fonts don't synthesise weight on native), so
+ * every named style sets an explicit `fontFamily`.
  */
 export const typography = {
-  // High-impact hero numbers / welcome
+  // Hero numbers / welcome
   display: {
+    fontFamily: jakarta(800),
     fontSize: 32,
     fontWeight: '800' as TextStyle['fontWeight'],
-    lineHeight: 40,
-    letterSpacing: -0.5,
+    lineHeight: 38,
+    letterSpacing: -0.8,
   } satisfies TextStyle,
 
   // Screen header title
   screenTitle: {
+    fontFamily: jakarta(800),
     fontSize: 22,
-    fontWeight: '700' as TextStyle['fontWeight'],
+    fontWeight: '800' as TextStyle['fontWeight'],
     lineHeight: 28,
-    letterSpacing: -0.3,
+    letterSpacing: -0.4,
   } satisfies TextStyle,
 
-  // Section headers (e.g., "Recent Sales", "Bill Items")
+  // Section headers ("Recent bills", "Items")
   sectionTitle: {
-    fontSize: 17,
+    fontFamily: jakarta(700),
+    fontSize: 15,
     fontWeight: '700' as TextStyle['fontWeight'],
-    lineHeight: 22,
-    letterSpacing: -0.2,
+    lineHeight: 20,
+    letterSpacing: -0.1,
   } satisfies TextStyle,
 
-  // Card headers (e.g. "Everest Café", "Payment Method")
+  // Card headers
   cardTitle: {
-    fontSize: 16,
-    fontWeight: '600' as TextStyle['fontWeight'],
-    lineHeight: 22,
+    fontFamily: jakarta(700),
+    fontSize: 15,
+    fontWeight: '700' as TextStyle['fontWeight'],
+    lineHeight: 20,
   } satisfies TextStyle,
 
   // Standard reading text
   body: {
-    fontSize: 15,
+    fontFamily: jakarta(400),
+    fontSize: 14,
     fontWeight: '400' as TextStyle['fontWeight'],
-    lineHeight: 22,
+    lineHeight: 21,
   } satisfies TextStyle,
 
-  // Emphasized body text
+  // Emphasised body text
   bodyMedium: {
+    fontFamily: jakarta(500),
     fontSize: 14,
     fontWeight: '500' as TextStyle['fontWeight'],
     lineHeight: 20,
@@ -58,6 +61,7 @@ export const typography = {
 
   // Compact body / description
   bodySmall: {
+    fontFamily: jakarta(400),
     fontSize: 13,
     fontWeight: '400' as TextStyle['fontWeight'],
     lineHeight: 18,
@@ -65,52 +69,56 @@ export const typography = {
 
   // Timestamps, helper hints
   caption: {
+    fontFamily: jakarta(400),
     fontSize: 12,
     fontWeight: '400' as TextStyle['fontWeight'],
     lineHeight: 16,
   } satisfies TextStyle,
 
-  // Form field labels & uppercase tags
+  // Form field labels & small tags
   label: {
+    fontFamily: jakarta(600),
     fontSize: 12,
     fontWeight: '600' as TextStyle['fontWeight'],
     lineHeight: 16,
-    letterSpacing: 0.5,
-    textTransform: 'uppercase',
+    letterSpacing: 0.2,
   } satisfies TextStyle,
 
   // Button CTAs
   button: {
-    fontSize: 16,
-    fontWeight: '600' as TextStyle['fontWeight'],
-    lineHeight: 22,
-    letterSpacing: 0.2,
+    fontFamily: jakarta(700),
+    fontSize: 15,
+    fontWeight: '700' as TextStyle['fontWeight'],
+    lineHeight: 20,
+    letterSpacing: 0.1,
   } satisfies TextStyle,
 
-  // Prominent financial monetary values
+  // Prominent monetary values
   amount: {
-    fontSize: 20,
-    fontWeight: '800' as TextStyle['fontWeight'],
-    lineHeight: 26,
+    fontFamily: jakarta(700),
+    fontSize: 18,
+    fontWeight: '700' as TextStyle['fontWeight'],
+    lineHeight: 24,
     fontVariant: ['tabular-nums'],
     letterSpacing: -0.3,
   } satisfies TextStyle,
 
-  // Large financial total (e.g. preview / payment)
+  // Large financial total (preview / payment)
   amountLarge: {
-    fontSize: 30,
+    fontFamily: jakarta(800),
+    fontSize: 28,
     fontWeight: '800' as TextStyle['fontWeight'],
-    lineHeight: 36,
+    lineHeight: 34,
     fontVariant: ['tabular-nums'],
-    letterSpacing: -0.5,
+    letterSpacing: -0.6,
   } satisfies TextStyle,
 
   // Invoice numbers and transaction references
   invoiceNumber: {
-    fontSize: 14,
-    fontWeight: '700' as TextStyle['fontWeight'],
-    lineHeight: 20,
-    fontFamily: monoFont,
+    fontFamily: plexMono(true),
+    fontSize: 12,
+    fontWeight: '500' as TextStyle['fontWeight'],
+    lineHeight: 16,
     letterSpacing: 0.2,
   } satisfies TextStyle,
 } as const;
@@ -118,25 +126,33 @@ export const typography = {
 export type TypographyNamedStyles = typeof typography;
 
 /**
- * Backward-compatible scale
+ * Backwards-compatible scale.
  */
 export const Typography = {
   ...typography,
 
-  // Font Sizes
+  family: {
+    sans: jakarta(400),
+    sansMedium: jakarta(500),
+    sansSemibold: jakarta(600),
+    sansBold: jakarta(700),
+    sansHeavy: jakarta(800),
+    mono: plexMono(false),
+    monoMedium: plexMono(true),
+  },
+
   size: {
     xxs: 11,
     xs: 12,
     sm: 14,
-    base: 16,
-    md: 18,
+    base: 15,
+    md: 17,
     lg: 20,
-    xl: 24,
-    xxl: 28,
-    display: 34,
+    xl: 22,
+    xxl: 26,
+    display: 32,
   },
 
-  // Font Weights
   weight: {
     regular: '400' as TextStyle['fontWeight'],
     medium: '500' as TextStyle['fontWeight'],
@@ -145,7 +161,6 @@ export const Typography = {
     heavy: '800' as TextStyle['fontWeight'],
   },
 
-  // Line Heights
   lineHeight: {
     tight: 1.2,
     normal: 1.4,

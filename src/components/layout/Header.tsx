@@ -1,9 +1,9 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ViewStyle } from 'react-native';
 import { useRouter } from 'expo-router';
-import { colors } from '@/constants/colors';
 import { spacing } from '@/constants/spacing';
 import { typography } from '@/constants/typography';
+import { makeStyles, useTheme } from '@/theme';
 import { Icon } from '../ui/Icon';
 
 export interface HeaderProps {
@@ -23,6 +23,8 @@ export function Header({
   rightAction,
   style,
 }: HeaderProps) {
+  const styles = useStyles();
+  const t = useTheme();
   const router = useRouter();
 
   const handleBack = () => {
@@ -45,7 +47,7 @@ export function Header({
               hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
               accessibilityRole="button"
               accessibilityLabel="Go back">
-              <Icon name="arrow-back" size={24} color={colors.text.primary} />
+              <Icon name="chevron-back" size={24} color={t.text.primary} />
             </TouchableOpacity>
           )}
           <View style={styles.titleContainer}>
@@ -66,12 +68,12 @@ export function Header({
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((t) => ({
   header: {
     minHeight: 56,
-    backgroundColor: colors.background.surface,
+    backgroundColor: t.background.canvas,
     borderBottomWidth: 1,
-    borderBottomColor: colors.border.subtle,
+    borderBottomColor: t.border.subtle,
     justifyContent: 'center',
   },
   centerConstrain: {
@@ -90,7 +92,8 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   backButton: {
-    marginRight: spacing.md,
+    marginRight: spacing.sm,
+    marginLeft: -spacing.xs,
     padding: spacing.xs,
     justifyContent: 'center',
     alignItems: 'center',
@@ -99,14 +102,13 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   title: {
-    ...typography.cardTitle,
-    fontSize: 18,
-    fontWeight: '700',
-    color: colors.text.primary,
+    ...typography.screenTitle,
+    fontSize: 19,
+    color: t.text.primary,
   },
   subtitle: {
     ...typography.caption,
-    color: colors.text.secondary,
+    color: t.text.secondary,
     marginTop: 1,
   },
   rightAction: {
@@ -114,4 +116,4 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginLeft: spacing.sm,
   },
-});
+}));

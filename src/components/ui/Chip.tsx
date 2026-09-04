@@ -8,12 +8,14 @@ import {
   TextStyle,
   View,
 } from 'react-native';
-import { colors } from '@/constants/colors';
 import { spacing } from '@/constants/spacing';
 import { radius } from '@/constants/radius';
 import { typography } from '@/constants/typography';
 import { motion } from '@/constants/motion';
+import { makeStyles, useTheme } from '@/theme';
 import { Icon, IconName } from './Icon';
+
+export type ChipTone = 'ink' | 'brand';
 
 export interface ChipProps {
   label: string;
@@ -21,6 +23,8 @@ export interface ChipProps {
   onPress: () => void;
   icon?: IconName;
   disabled?: boolean;
+  /** Selected-state treatment: solid ink (filters) or brand tint (discount). */
+  selectedTone?: ChipTone;
   style?: ViewStyle;
   textStyle?: TextStyle;
   size?: 'sm' | 'md';
@@ -33,11 +37,14 @@ export function Chip({
   onPress,
   icon,
   disabled = false,
+  selectedTone = 'ink',
   style,
   textStyle,
   size = 'md',
   testID,
 }: ChipProps) {
+  const styles = useStyles();
+  const t = useTheme();
   const scaleAnim = useRef(new Animated.Value(1)).current;
 
   const handlePressIn = () => {
@@ -59,6 +66,13 @@ export function Chip({
   };
 
   const isSm = size === 'sm';
+  const brand = selectedTone === 'brand';
+
+  const iconColor = !selected
+    ? t.text.secondary
+    : brand
+      ? t.brand.primary
+      : t.background.surface;
 
   return (
     <Animated.View style={{ transform: [{ scale: scaleAnim }] }}>
@@ -73,24 +87,24 @@ export function Chip({
         style={[
           styles.base,
           isSm ? styles.sm : styles.md,
-          selected ? styles.selected : styles.unselected,
+          selected ? (brand ? styles.selectedBrand : styles.selectedInk) : styles.unselected,
           disabled && styles.disabled,
           style,
         ]}>
         {icon && (
           <View style={styles.iconContainer}>
-            <Icon
-              name={icon}
-              size={isSm ? 14 : 16}
-              color={selected ? colors.brand.primary : colors.text.secondary}
-            />
+            <Icon name={icon} size={isSm ? 14 : 16} color={iconColor} />
           </View>
         )}
         <Text
           style={[
             styles.label,
             isSm ? styles.smLabel : styles.mdLabel,
-            selected ? styles.selectedLabel : styles.unselectedLabel,
+            selected
+              ? brand
+                ? styles.selectedBrandLabel
+                : styles.selectedInkLabel
+              : styles.unselectedLabel,
             disabled && styles.disabledLabel,
             textStyle,
           ]}>
@@ -101,7 +115,7 @@ export function Chip({
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((t) => ({
   base: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -109,27 +123,32 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-start',
   },
   sm: {
-    paddingHorizontal: spacing.sm,
+    paddingHorizontal: spacing.md,
     paddingVertical: spacing.xs,
   },
   md: {
-    paddingHorizontal: spacing.md,
+    paddingHorizontal: spacing.lg,
     paddingVertical: spacing.sm,
   },
-  selected: {
-    backgroundColor: colors.brand.subtle,
-    borderWidth: 1.5,
-    borderColor: colors.brand.primary,
-  },
   unselected: {
-    backgroundColor: colors.background.surface,
+    backgroundColor: t.background.surface,
     borderWidth: 1,
-    borderColor: colors.border.default,
+    borderColor: t.border.default,
+  },
+  selectedInk: {
+    backgroundColor: t.text.primary,
+    borderWidth: 1,
+    borderColor: t.text.primary,
+  },
+  selectedBrand: {
+    backgroundColor: t.brand.subtle,
+    borderWidth: 1,
+    borderColor: t.brand.primary,
   },
   disabled: {
-    backgroundColor: colors.background.subtle,
-    borderColor: colors.border.subtle,
-    opacity: 0.6,
+    backgroundColor: t.background.subtle,
+    borderColor: t.border.subtle,
+    opacity: 0.5,
   },
   iconContainer: {
     marginRight: spacing.xs,
@@ -145,15 +164,19 @@ const styles = StyleSheet.create({
     fontSize: 14,
     lineHeight: 18,
   },
-  selectedLabel: {
-    color: colors.brand.primary,
-    fontWeight: '700',
-  },
   unselectedLabel: {
-    color: colors.text.secondary,
+    color: t.text.secondary,
     fontWeight: '500',
   },
-  disabledLabel: {
-    color: colors.text.muted,
+  selectedInkLabel: {
+    color: t.background.surface,
+    fontWeight: '700',
   },
-});
+  selectedBrandLabel: {
+    color: t.brand.primary,
+    fontWeight: '700',
+  },
+  disabledLabel: {
+    color: t.text.muted,
+  },
+}));

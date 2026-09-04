@@ -8,8 +8,8 @@ import {
   Platform,
 } from 'react-native';
 import { SafeAreaView, Edge } from 'react-native-safe-area-context';
-import { colors } from '@/constants/colors';
 import { spacing } from '@/constants/spacing';
+import { makeStyles, useTheme } from '@/theme';
 import { Header, HeaderProps } from './Header';
 import { BottomActionBar } from './BottomActionBar';
 
@@ -33,14 +33,17 @@ export function Screen({
   style,
   contentContainerStyle,
   edges = ['top', 'left', 'right'],
-  backgroundColor = colors.background.canvas,
+  backgroundColor,
   testID,
 }: ScreenProps) {
+  const styles = useStyles();
+  const t = useTheme();
+
   return (
     <SafeAreaView
       testID={testID}
       edges={edges}
-      style={[styles.safeArea, { backgroundColor }]}>
+      style={[styles.safeArea, { backgroundColor: backgroundColor ?? t.background.canvas }]}>
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         style={styles.keyboardAvoid}>
@@ -66,7 +69,7 @@ export function Screen({
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles(() => ({
   safeArea: {
     flex: 1,
   },
@@ -88,4 +91,4 @@ const styles = StyleSheet.create({
   fixedContainer: {
     padding: spacing.lg,
   },
-});
+}));

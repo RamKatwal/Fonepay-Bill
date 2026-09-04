@@ -13,11 +13,11 @@ import {
 } from 'react-native';
 import { Sale } from '@/types/sale';
 import { Merchant } from '@/types/merchant';
-import { Colors } from '@/constants/colors';
 import { Spacing, BorderRadius } from '@/constants/spacing';
 import { Typography } from '@/constants/typography';
+import { shadows } from '@/constants/shadows';
+import { makeStyles, useTheme } from '@/theme';
 import { Icon } from '@/components/ui/Icon';
-import { Button } from '@/components/ui/Button';
 import {
   generateBillImageDataUrl,
   downloadBillImage,
@@ -43,13 +43,14 @@ export function ShareBillModal({
   merchant,
   isOfficial = true,
 }: ShareBillModalProps) {
+  const styles = useStyles();
+  const c = useTheme();
   const [activeTab, setActiveTab] = useState<'image' | 'text'>('image');
   const [imageResult, setImageResult] = useState<BillImageResult | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [isSharing, setIsSharing] = useState(false);
   const [feedback, setFeedback] = useState<string | null>(null);
 
-  // Generate the bill image when modal opens or sale changes
   useEffect(() => {
     if (visible && sale) {
       let isMounted = true;
@@ -147,29 +148,26 @@ export function ShareBillModal({
         <View style={styles.overlay}>
           <TouchableWithoutFeedback>
             <View style={styles.modalCard}>
-              {/* Modal Header */}
               <View style={styles.header}>
                 <View style={styles.headerTitleWrap}>
-                  <Text style={styles.headerTitle}>Share & Export Bill</Text>
+                  <Text style={styles.headerTitle}>Share & export bill</Text>
                   <Text style={styles.headerSubtitle}>Invoice #{sale.invoiceNumber}</Text>
                 </View>
                 <TouchableOpacity
                   onPress={onClose}
                   hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
                   style={styles.closeBtn}>
-                  <Icon name="close" size={20} color={Colors.textSecondary} />
+                  <Icon name="close" size={20} color={c.text.secondary} />
                 </TouchableOpacity>
               </View>
 
-              {/* Feedback Banner */}
               {feedback && (
                 <View style={styles.feedbackBanner}>
-                  <Icon name="checkmark-circle" size={16} color={Colors.success} />
+                  <Icon name="checkmark-circle" size={16} color={c.status.success} />
                   <Text style={styles.feedbackText}>{feedback}</Text>
                 </View>
               )}
 
-              {/* Format Switcher Tabs */}
               <View style={styles.tabsContainer}>
                 <TouchableOpacity
                   style={[styles.tab, activeTab === 'image' && styles.tabActive]}
@@ -177,18 +175,15 @@ export function ShareBillModal({
                   <Icon
                     name="image-outline"
                     size={16}
-                    color={activeTab === 'image' ? Colors.primary : Colors.textSecondary}
+                    color={activeTab === 'image' ? c.text.primary : c.text.secondary}
                   />
                   <Text
                     style={[
                       styles.tabText,
                       activeTab === 'image' && styles.tabTextActive,
                     ]}>
-                    Image Preview (PNG)
+                    Image (PNG)
                   </Text>
-                  <View style={styles.tabBadge}>
-                    <Text style={styles.tabBadgeText}>HD</Text>
-                  </View>
                 </TouchableOpacity>
 
                 <TouchableOpacity
@@ -197,19 +192,18 @@ export function ShareBillModal({
                   <Icon
                     name="text-outline"
                     size={16}
-                    color={activeTab === 'text' ? Colors.primary : Colors.textSecondary}
+                    color={activeTab === 'text' ? c.text.primary : c.text.secondary}
                   />
                   <Text
                     style={[
                       styles.tabText,
                       activeTab === 'text' && styles.tabTextActive,
                     ]}>
-                    Text Summary
+                    Text summary
                   </Text>
                 </TouchableOpacity>
               </View>
 
-              {/* Preview Body */}
               <ScrollView
                 style={styles.scrollArea}
                 contentContainerStyle={styles.scrollContent}
@@ -218,23 +212,16 @@ export function ShareBillModal({
                   <View style={styles.imagePreviewWrap}>
                     {isGenerating ? (
                       <View style={styles.loadingBox}>
-                        <ActivityIndicator size="large" color={Colors.primary} />
-                        <Text style={styles.loadingText}>Generating official receipt image...</Text>
-                        <Text style={styles.loadingSubtext}>Rendering crisp 2x Retina tax invoice</Text>
+                        <ActivityIndicator size="large" color={c.text.secondary} />
+                        <Text style={styles.loadingText}>Generating receipt image…</Text>
+                        <Text style={styles.loadingSubtext}>Rendering 2x tax invoice</Text>
                       </View>
                     ) : imageResult ? (
                       <View style={styles.imageCard}>
                         <View style={styles.imageHeaderBar}>
-                          <View style={styles.imageFormatTag}>
-                            <View style={styles.pulseDot} />
-                            <Text style={styles.imageFormatTagText}>PNG Image Format</Text>
-                          </View>
-                          <Text style={styles.imageResolutionText}>
-                            High-Res • 1440px
-                          </Text>
+                          <Text style={styles.imageFormatTagText}>PNG image</Text>
+                          <Text style={styles.imageResolutionText}>1440px</Text>
                         </View>
-
-                        {/* Image element */}
                         <Image
                           source={{ uri: imageResult.dataUrl }}
                           style={styles.billImage}
@@ -243,7 +230,7 @@ export function ShareBillModal({
                       </View>
                     ) : (
                       <View style={styles.errorBox}>
-                        <Icon name="alert-circle-outline" size={32} color={Colors.failed} />
+                        <Icon name="alert-circle-outline" size={32} color={c.status.error} />
                         <Text style={styles.errorText}>Unable to render invoice image</Text>
                       </View>
                     )}
@@ -257,9 +244,7 @@ export function ShareBillModal({
                 )}
               </ScrollView>
 
-              {/* Action Buttons Footer */}
               <View style={styles.actionsFooter}>
-                {/* Primary WhatsApp Action */}
                 <TouchableOpacity
                   style={styles.whatsappBtn}
                   activeOpacity={0.88}
@@ -267,38 +252,35 @@ export function ShareBillModal({
                   disabled={isSharing}>
                   <View style={styles.btnContentRow}>
                     <Icon name="logo-whatsapp" size={20} color="#FFFFFF" />
-                    <Text style={styles.whatsappBtnText}>
-                      Share on WhatsApp
-                    </Text>
+                    <Text style={styles.whatsappBtnText}>Share on WhatsApp</Text>
                   </View>
                 </TouchableOpacity>
 
-                {/* Secondary Row: Download & System Share */}
                 <View style={styles.actionRow}>
                   <TouchableOpacity
-                    style={[styles.actionBtn, styles.downloadBtn]}
+                    style={styles.actionBtn}
                     activeOpacity={0.88}
                     onPress={handleDownload}
                     disabled={!imageResult || isGenerating}>
-                    <Icon name="download-outline" size={18} color={Colors.primary} />
-                    <Text style={styles.actionBtnText}>Download Image</Text>
+                    <Icon name="download-outline" size={18} color={c.text.primary} />
+                    <Text style={styles.actionBtnText}>Download</Text>
                   </TouchableOpacity>
 
                   <TouchableOpacity
-                    style={[styles.actionBtn, styles.systemShareBtn]}
+                    style={styles.actionBtn}
                     activeOpacity={0.88}
                     onPress={handleSystemShare}
                     disabled={isSharing}>
-                    <Icon name="share-social-outline" size={18} color={Colors.text} />
-                    <Text style={[styles.actionBtnText, { color: Colors.text }]}>Share via...</Text>
+                    <Icon name="share-social-outline" size={18} color={c.text.primary} />
+                    <Text style={styles.actionBtnText}>Share via…</Text>
                   </TouchableOpacity>
 
                   <TouchableOpacity
                     style={[styles.actionBtn, styles.copyBtn]}
                     activeOpacity={0.88}
                     onPress={handleCopyText}>
-                    <Icon name="copy-outline" size={18} color={Colors.textSecondary} />
-                    <Text style={[styles.actionBtnText, { color: Colors.textSecondary }]}>Copy</Text>
+                    <Icon name="copy-outline" size={18} color={c.text.secondary} />
+                    <Text style={[styles.actionBtnText, { color: c.text.secondary }]}>Copy</Text>
                   </TouchableOpacity>
                 </View>
               </View>
@@ -310,27 +292,22 @@ export function ShareBillModal({
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((t) => ({
   overlay: {
     flex: 1,
-    backgroundColor: Colors.overlay,
+    backgroundColor: t.overlay,
     justifyContent: 'center',
     alignItems: 'center',
     padding: Spacing.md,
   },
   modalCard: {
-    backgroundColor: Colors.surface,
+    backgroundColor: t.background.elevated,
     borderRadius: BorderRadius.xl,
     width: '100%',
     maxWidth: 520,
     maxHeight: '90%',
-    display: 'flex',
     flexDirection: 'column',
-    shadowColor: Colors.cardShadow,
-    shadowOffset: { width: 0, height: 12 },
-    shadowOpacity: 1,
-    shadowRadius: 24,
-    elevation: 8,
+    ...shadows.elevated,
     overflow: 'hidden',
   },
   header: {
@@ -341,40 +318,37 @@ const styles = StyleSheet.create({
     paddingTop: Spacing.lg,
     paddingBottom: Spacing.sm,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.borderSubtle,
+    borderBottomColor: t.border.subtle,
   },
   headerTitleWrap: {
     flex: 1,
   },
   headerTitle: {
-    fontSize: Typography.size.md,
-    fontWeight: Typography.weight.bold,
-    color: Colors.text,
+    ...Typography.sectionTitle,
+    color: t.text.primary,
   },
   headerSubtitle: {
     fontSize: Typography.size.xs,
-    color: Colors.textMuted,
+    color: t.text.muted,
     marginTop: 2,
   },
   closeBtn: {
     padding: 6,
     borderRadius: BorderRadius.full,
-    backgroundColor: Colors.surfaceSubtle,
+    backgroundColor: t.background.subtle,
   },
   feedbackBanner: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
-    backgroundColor: Colors.successSubtle,
+    backgroundColor: t.status.successBackground,
     paddingHorizontal: Spacing.md,
     paddingVertical: 8,
-    borderBottomWidth: 1,
-    borderBottomColor: '#BBF7D0',
   },
   feedbackText: {
     fontSize: Typography.size.xs,
     fontWeight: Typography.weight.semibold,
-    color: Colors.successText,
+    color: t.status.success,
     flex: 1,
   },
   tabsContainer: {
@@ -382,7 +356,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.md,
     paddingTop: Spacing.sm,
     paddingBottom: Spacing.xs,
-    backgroundColor: Colors.surfaceSubtle,
+    backgroundColor: t.background.subtle,
     gap: 8,
   },
   tab: {
@@ -396,36 +370,21 @@ const styles = StyleSheet.create({
     borderColor: 'transparent',
   },
   tabActive: {
-    backgroundColor: Colors.surface,
-    borderColor: Colors.border,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
+    backgroundColor: t.background.surface,
+    borderColor: t.border.strong,
   },
   tabText: {
     fontSize: Typography.size.xs,
     fontWeight: Typography.weight.medium,
-    color: Colors.textSecondary,
+    color: t.text.secondary,
   },
   tabTextActive: {
     fontWeight: Typography.weight.bold,
-    color: Colors.text,
-  },
-  tabBadge: {
-    backgroundColor: Colors.primarySubtle,
-    paddingHorizontal: 5,
-    paddingVertical: 1,
-    borderRadius: 4,
-  },
-  tabBadgeText: {
-    fontSize: 9,
-    fontWeight: Typography.weight.bold,
-    color: Colors.primary,
+    color: t.text.primary,
   },
   scrollArea: {
     flex: 1,
-    backgroundColor: '#F8FAFC',
+    backgroundColor: t.background.subtle,
   },
   scrollContent: {
     padding: Spacing.md,
@@ -441,11 +400,11 @@ const styles = StyleSheet.create({
   loadingText: {
     fontSize: Typography.size.sm,
     fontWeight: Typography.weight.semibold,
-    color: Colors.text,
+    color: t.text.primary,
   },
   loadingSubtext: {
     fontSize: Typography.size.xs,
-    color: Colors.textMuted,
+    color: t.text.muted,
   },
   errorBox: {
     paddingVertical: 36,
@@ -454,51 +413,35 @@ const styles = StyleSheet.create({
   },
   errorText: {
     fontSize: Typography.size.sm,
-    color: Colors.failed,
+    color: t.status.error,
   },
   imageCard: {
     width: '100%',
-    backgroundColor: Colors.surface,
+    backgroundColor: t.background.surface,
     borderRadius: BorderRadius.md,
     borderWidth: 1,
-    borderColor: Colors.border,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.08,
-    shadowRadius: 10,
-    elevation: 3,
+    borderColor: t.border.subtle,
     overflow: 'hidden',
   },
   imageHeaderBar: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: '#F1F5F9',
+    backgroundColor: t.background.subtle,
     paddingHorizontal: 12,
     paddingVertical: 8,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.border,
-  },
-  imageFormatTag: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-  },
-  pulseDot: {
-    width: 7,
-    height: 7,
-    borderRadius: 4,
-    backgroundColor: Colors.success,
+    borderBottomColor: t.border.subtle,
   },
   imageFormatTagText: {
     fontSize: 11,
     fontWeight: Typography.weight.bold,
-    color: Colors.textSecondary,
+    color: t.text.secondary,
     letterSpacing: 0.3,
   },
   imageResolutionText: {
     fontSize: 11,
-    color: Colors.textMuted,
+    color: t.text.muted,
     fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace',
   },
   billImage: {
@@ -510,37 +453,32 @@ const styles = StyleSheet.create({
     padding: Spacing.xs,
   },
   textContainer: {
-    backgroundColor: Colors.surface,
+    backgroundColor: t.background.surface,
     padding: Spacing.md,
     borderRadius: BorderRadius.md,
     borderWidth: 1,
-    borderColor: Colors.border,
+    borderColor: t.border.subtle,
   },
   monospaceText: {
     fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace',
     fontSize: Typography.size.xs,
     lineHeight: 18,
-    color: Colors.text,
+    color: t.text.primary,
   },
   actionsFooter: {
     padding: Spacing.md,
-    backgroundColor: Colors.surface,
+    backgroundColor: t.background.surface,
     borderTopWidth: 1,
-    borderTopColor: Colors.borderSubtle,
+    borderTopColor: t.border.subtle,
     gap: Spacing.sm,
   },
   whatsappBtn: {
-    backgroundColor: '#25D366', // WhatsApp Green
+    backgroundColor: '#25D366',
     borderRadius: BorderRadius.md,
     paddingVertical: 12,
     paddingHorizontal: Spacing.md,
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: '#25D366',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.25,
-    shadowRadius: 6,
-    elevation: 3,
   },
   btnContentRow: {
     flexDirection: 'row',
@@ -566,22 +504,15 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     borderRadius: BorderRadius.md,
     borderWidth: 1,
-    backgroundColor: Colors.surface,
-  },
-  downloadBtn: {
-    borderColor: Colors.primary,
-    backgroundColor: Colors.primaryMuted,
-  },
-  systemShareBtn: {
-    borderColor: Colors.border,
+    borderColor: t.border.default,
+    backgroundColor: t.background.surface,
   },
   copyBtn: {
     flex: 0.7,
-    borderColor: Colors.border,
   },
   actionBtnText: {
     fontSize: Typography.size.xs,
     fontWeight: Typography.weight.bold,
-    color: Colors.primary,
+    color: t.text.primary,
   },
-});
+}));

@@ -1,18 +1,19 @@
 import React, { useEffect } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { Text, View } from 'react-native';
 import { usePathname, useRouter } from 'expo-router';
-import { Colors } from '@/constants/colors';
-import { Spacing } from '@/constants/spacing';
-import { Typography } from '@/constants/typography';
+import { Spacing, BorderRadius } from '@/constants/spacing';
+import { typography } from '@/constants/typography';
+import { makeStyles, useTheme } from '@/theme';
 import { Button } from '@/components/ui/Button';
 import { Icon } from '@/components/ui/Icon';
 
 export default function NotFoundScreen() {
+  const styles = useStyles();
+  const t = useTheme();
   const pathname = usePathname();
   const router = useRouter();
 
   useEffect(() => {
-    // If URL contains /index suffix, automatically redirect to canonical route
     if (pathname === '/dashboard/index' || pathname.startsWith('/dashboard/index')) {
       router.replace('/dashboard' as any);
     } else if (pathname === '/sales/index') {
@@ -27,49 +28,48 @@ export default function NotFoundScreen() {
   return (
     <View style={styles.container}>
       <View style={styles.iconCircle}>
-        <Icon name="alert-circle" size={48} color={Colors.primary} />
+        <Icon name="arrow-forward" size={28} color={t.text.secondary} />
       </View>
-      <Text style={styles.title}>Redirecting to Dashboard...</Text>
-      <Text style={styles.message}>
-        The canonical URL is /dashboard. Taking you there now.
-      </Text>
+      <Text style={styles.title}>Redirecting…</Text>
+      <Text style={styles.message}>Taking you to the dashboard now.</Text>
       <Button
-        title="Go to Dashboard"
+        title="Go to dashboard"
         onPress={() => router.replace('/dashboard' as any)}
         size="md"
         variant="primary"
+        fullWidth={false}
         style={styles.button}
       />
     </View>
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((t) => ({
   container: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
     padding: Spacing.xl,
-    backgroundColor: Colors.background,
+    backgroundColor: t.background.canvas,
   },
   iconCircle: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: Colors.primaryMuted,
+    width: 64,
+    height: 64,
+    borderRadius: BorderRadius.full,
+    backgroundColor: t.background.subtle,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: Spacing.lg,
   },
   title: {
-    fontSize: Typography.size.xl,
-    fontWeight: Typography.weight.bold,
-    color: Colors.text,
+    ...typography.sectionTitle,
+    color: t.text.primary,
     marginBottom: Spacing.xs,
   },
   message: {
-    fontSize: Typography.size.sm,
-    color: Colors.textSecondary,
+    ...typography.body,
+    fontSize: 14,
+    color: t.text.secondary,
     textAlign: 'center',
     marginBottom: Spacing.xl,
     maxWidth: 300,
@@ -77,4 +77,4 @@ const styles = StyleSheet.create({
   button: {
     minWidth: 200,
   },
-});
+}));

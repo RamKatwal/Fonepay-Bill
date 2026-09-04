@@ -1,8 +1,8 @@
 import React from 'react';
 import { View, Text, StyleSheet, ViewStyle } from 'react-native';
-import { Colors } from '@/constants/colors';
 import { Spacing, BorderRadius } from '@/constants/spacing';
-import { Typography } from '@/constants/typography';
+import { typography } from '@/constants/typography';
+import { makeStyles, useTheme } from '@/theme';
 import { Icon, IconName } from './Icon';
 import { Button } from './Button';
 
@@ -23,10 +23,13 @@ export function EmptyState({
   onAction,
   style,
 }: EmptyStateProps) {
+  const styles = useStyles();
+  const t = useTheme();
+
   return (
     <View style={[styles.container, style]}>
       <View style={styles.iconCircle}>
-        <Icon name={icon} size={36} color={Colors.primary} />
+        <Icon name={icon} size={32} color={t.text.muted} />
       </View>
       <Text style={styles.title}>{title}</Text>
       <Text style={styles.description}>{description}</Text>
@@ -45,7 +48,7 @@ export function EmptyState({
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((t) => ({
   container: {
     alignItems: 'center',
     justifyContent: 'center',
@@ -53,29 +56,28 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.xl,
   },
   iconCircle: {
-    width: 72,
-    height: 72,
+    width: 64,
+    height: 64,
     borderRadius: BorderRadius.full,
-    backgroundColor: Colors.primaryMuted,
+    backgroundColor: t.background.subtle,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: Spacing.lg,
   },
   title: {
-    fontSize: Typography.size.lg,
-    fontWeight: Typography.weight.bold,
-    color: Colors.text,
+    ...typography.sectionTitle,
+    color: t.text.primary,
     textAlign: 'center',
     marginBottom: Spacing.xs,
   },
   description: {
-    fontSize: Typography.size.sm,
-    color: Colors.textSecondary,
+    ...typography.body,
+    fontSize: 14,
+    color: t.text.secondary,
     textAlign: 'center',
-    lineHeight: 20,
     maxWidth: 280,
   },
   buttonContainer: {
     marginTop: Spacing.xl,
   },
-});
+}));

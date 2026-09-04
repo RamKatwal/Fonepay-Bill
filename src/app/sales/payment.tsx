@@ -4,16 +4,18 @@ import { useRouter } from 'expo-router';
 import { useSaleContext } from '@/store/SaleContext';
 import { Screen } from '@/components/layout/Screen';
 import { Button } from '@/components/ui/Button';
-import { Card } from '@/components/ui/Card';
-import { Colors } from '@/constants/colors';
 import { Spacing, BorderRadius } from '@/constants/spacing';
-import { Typography } from '@/constants/typography';
+import { radius } from '@/constants/radius';
+import { typography, Typography } from '@/constants/typography';
 import { Icon } from '@/components/ui/Icon';
+import { makeStyles, useTheme } from '@/theme';
 import { formatNPR } from '@/utils/currency';
 import { PaymentMode } from '@/types/payment';
 
 export default function PaymentSelectionScreen() {
   const router = useRouter();
+  const styles = useStyles();
+  const t = useTheme();
   const { currentSale, setPaymentMode, setPaymentStatus, completeSale } = useSaleContext();
   const [selectedMode, setSelectedMode] = useState<PaymentMode>('fonepay');
 
@@ -30,219 +32,144 @@ export default function PaymentSelectionScreen() {
     }
   };
 
+  const renderOption = (
+    mode: PaymentMode,
+    icon: 'qr-code-outline' | 'cash-outline',
+    title: string,
+    description: string
+  ) => {
+    const on = selectedMode === mode;
+    return (
+      <TouchableOpacity
+        activeOpacity={0.85}
+        onPress={() => setSelectedMode(mode)}
+        style={[styles.option, on && styles.optionOn]}>
+        <View style={[styles.optionIcon, on && styles.optionIconOn]}>
+          <Icon name={icon} size={22} color={on ? t.text.inverse : t.text.secondary} />
+        </View>
+        <View style={styles.optionText}>
+          <Text style={styles.optionTitle}>{title}</Text>
+          <Text style={styles.optionDesc}>{description}</Text>
+        </View>
+        <View style={[styles.radio, on && styles.radioOn]}>
+          {on && <Icon name="checkmark" size={13} color={t.text.inverse} />}
+        </View>
+      </TouchableOpacity>
+    );
+  };
+
   return (
     <Screen
-      headerProps={{
-        title: 'Payment Method',
-        subtitle: currentSale.invoiceNumber,
-        showBack: true,
-      }}
+      headerProps={{ title: 'Payment', showBack: true }}
       footer={
         <Button
-          title={
-            selectedMode === 'cash'
-              ? `Confirm Cash Received • ${formatNPR(currentSale.netAmount)}`
-              : `Continue to Fonepay QR • ${formatNPR(currentSale.netAmount)}`
-          }
+          title={selectedMode === 'cash' ? 'Mark as paid in cash' : 'Show Fonepay QR'}
           onPress={handleContinuePayment}
           size="lg"
-          rightIcon={<Icon name="arrow-forward" size={20} color={Colors.textInverse} />}
         />
       }>
-      {/* Bill Total Card */}
-      <Card variant="accent" style={styles.amountCard}>
-        <Text style={styles.amountLabel}>Total Payable Amount</Text>
-        <Text style={styles.amountValue}>{formatNPR(currentSale.netAmount)}</Text>
-        <Text style={styles.invoiceMeta}>
-          Invoice {currentSale.invoiceNumber} • {currentSale.items.length} Items
+      <View style={styles.amountBlock}>
+        <Text style={styles.amountLabel}>Amount due</Text>
+        <Text style={styles.amount}>{formatNPR(currentSale.netAmount)}</Text>
+        <Text style={styles.amountMeta}>
+          {currentSale.items.length === 1 ? '1 item' : `${currentSale.items.length} items`}
         </Text>
-      </Card>
+      </View>
 
-      <Text style={styles.sectionTitle}>Select Payment Mode</Text>
+      <Text style={styles.sectionTitle}>How is the customer paying?</Text>
 
-      {/* Payment Options */}
-      <View style={styles.optionsList}>
-        {/* Fonepay QR Option */}
-        <TouchableOpacity
-          activeOpacity={0.8}
-          onPress={() => setSelectedMode('fonepay')}
-          style={[
-            styles.optionCard,
-            selectedMode === 'fonepay' && styles.optionCardSelected,
-          ]}>
-          <View style={styles.radioBox}>
-            <View
-              style={[
-                styles.radioOuter,
-                selectedMode === 'fonepay' && styles.radioOuterSelected,
-              ]}>
-              {selectedMode === 'fonepay' && <View style={styles.radioInner} />}
-            </View>
-          </View>
-
-          <View style={styles.optionIconContainerFonepay}>
-            <Icon name="qr-code-outline" size={26} color={Colors.fonepayText} />
-          </View>
-
-          <View style={styles.optionTextContainer}>
-            <View style={styles.optionTitleRow}>
-              <Text style={styles.optionTitle}>Fonepay QR</Text>
-              <View style={styles.recommendedBadge}>
-                <Text style={styles.recommendedText}>Digital</Text>
-              </View>
-            </View>
-            <Text style={styles.optionDescription}>
-              Customer scans dynamic QR code from any mobile banking or wallet app
-            </Text>
-          </View>
-        </TouchableOpacity>
-
-        {/* Cash Option */}
-        <TouchableOpacity
-          activeOpacity={0.8}
-          onPress={() => setSelectedMode('cash')}
-          style={[
-            styles.optionCard,
-            selectedMode === 'cash' && styles.optionCardSelected,
-          ]}>
-          <View style={styles.radioBox}>
-            <View
-              style={[
-                styles.radioOuter,
-                selectedMode === 'cash' && styles.radioOuterSelected,
-              ]}>
-              {selectedMode === 'cash' && <View style={styles.radioInner} />}
-            </View>
-          </View>
-
-          <View style={styles.optionIconContainerCash}>
-            <Icon name="cash-outline" size={26} color={Colors.cashText} />
-          </View>
-
-          <View style={styles.optionTextContainer}>
-            <Text style={styles.optionTitle}>Cash Payment</Text>
-            <Text style={styles.optionDescription}>
-              Customer pays cash in person. Confirm payment and generate official bill.
-            </Text>
-          </View>
-        </TouchableOpacity>
+      <View style={styles.options}>
+        {renderOption(
+          'fonepay',
+          'qr-code-outline',
+          'Fonepay QR',
+          'Customer scans · settles to your account'
+        )}
+        {renderOption('cash', 'cash-outline', 'Cash', 'Collected at the counter')}
       </View>
     </Screen>
   );
 }
 
-const styles = StyleSheet.create({
-  amountCard: {
-    padding: Spacing.xl,
+const useStyles = makeStyles((t) => ({
+  amountBlock: {
     alignItems: 'center',
-    marginBottom: Spacing.xl,
+    paddingTop: Spacing.sm,
+    paddingBottom: Spacing.xxl,
+    gap: 4,
   },
   amountLabel: {
-    fontSize: Typography.size.xs,
-    color: Colors.primaryDark,
-    textTransform: 'uppercase',
-    fontWeight: Typography.weight.semibold,
-    marginBottom: 4,
+    ...typography.label,
+    color: t.text.secondary,
   },
-  amountValue: {
-    fontSize: Typography.size.display,
-    fontWeight: Typography.weight.heavy,
-    color: Colors.primary,
-    marginBottom: 4,
+  amount: {
+    ...typography.display,
+    fontSize: 36,
+    lineHeight: 42,
+    color: t.text.primary,
   },
-  invoiceMeta: {
-    fontSize: Typography.size.xs,
-    color: Colors.textSecondary,
+  amountMeta: {
+    ...typography.invoiceNumber,
+    fontFamily: Typography.family.mono,
+    color: t.text.secondary,
   },
   sectionTitle: {
-    fontSize: Typography.size.sm,
-    fontWeight: Typography.weight.bold,
-    color: Colors.text,
+    ...typography.sectionTitle,
+    color: t.text.primary,
     marginBottom: Spacing.md,
   },
-  optionsList: {
+  options: {
     gap: Spacing.md,
   },
-  optionCard: {
+  option: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.surface,
-    borderWidth: 1.5,
-    borderColor: Colors.border,
-    borderRadius: BorderRadius.xl,
-    padding: Spacing.lg,
     gap: Spacing.md,
+    borderWidth: 1,
+    borderColor: t.border.default,
+    borderRadius: radius.card,
+    padding: Spacing.lg,
+    backgroundColor: t.background.surface,
   },
-  optionCardSelected: {
-    borderColor: Colors.primary,
-    backgroundColor: Colors.surface,
+  optionOn: {
+    borderWidth: 2,
+    borderColor: t.brand.primary,
+    backgroundColor: t.brand.subtle,
   },
-  radioBox: {
-    justifyContent: 'center',
+  optionIcon: {
+    width: 44,
+    height: 44,
+    borderRadius: BorderRadius.md,
+    backgroundColor: t.background.subtle,
     alignItems: 'center',
+    justifyContent: 'center',
   },
-  radioOuter: {
+  optionIconOn: {
+    backgroundColor: t.brand.primary,
+  },
+  optionText: {
+    flex: 1,
+    gap: 2,
+  },
+  optionTitle: {
+    ...typography.cardTitle,
+    color: t.text.primary,
+  },
+  optionDesc: {
+    ...typography.caption,
+    color: t.text.secondary,
+  },
+  radio: {
     width: 22,
     height: 22,
     borderRadius: 11,
-    borderWidth: 2,
-    borderColor: Colors.borderDark,
+    borderWidth: 1.5,
+    borderColor: t.border.default,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  radioOuterSelected: {
-    borderColor: Colors.primary,
+  radioOn: {
+    borderWidth: 0,
+    backgroundColor: t.brand.primary,
   },
-  radioInner: {
-    width: 12,
-    height: 12,
-    borderRadius: 6,
-    backgroundColor: Colors.primary,
-  },
-  optionIconContainerFonepay: {
-    width: 48,
-    height: 48,
-    borderRadius: BorderRadius.lg,
-    backgroundColor: Colors.fonepaySubtle,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  optionIconContainerCash: {
-    width: 48,
-    height: 48,
-    borderRadius: BorderRadius.lg,
-    backgroundColor: Colors.cashSubtle,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  optionTextContainer: {
-    flex: 1,
-  },
-  optionTitleRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: Spacing.sm,
-    marginBottom: 2,
-  },
-  optionTitle: {
-    fontSize: Typography.size.base,
-    fontWeight: Typography.weight.bold,
-    color: Colors.text,
-  },
-  recommendedBadge: {
-    backgroundColor: Colors.primarySubtle,
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: BorderRadius.xs,
-  },
-  recommendedText: {
-    fontSize: Typography.size.xxs,
-    fontWeight: Typography.weight.bold,
-    color: Colors.primary,
-  },
-  optionDescription: {
-    fontSize: Typography.size.xs,
-    color: Colors.textSecondary,
-    lineHeight: 16,
-  },
-});
+}));

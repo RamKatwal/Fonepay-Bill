@@ -3,10 +3,10 @@ import { View, Text, StyleSheet, ViewStyle } from 'react-native';
 import { Merchant } from '@/types/merchant';
 import { Card } from '@/components/ui/Card';
 import { Icon } from '@/components/ui/Icon';
-import { colors } from '@/constants/colors';
 import { spacing } from '@/constants/spacing';
 import { radius } from '@/constants/radius';
 import { typography } from '@/constants/typography';
+import { makeStyles, useTheme } from '@/theme';
 
 export interface MerchantInfoCardProps {
   merchant: Merchant;
@@ -15,38 +15,37 @@ export interface MerchantInfoCardProps {
 }
 
 /**
- * MerchantInfoCard
- * Read-only information presentation that explicitly communicates:
- * "This information comes from Fonepay."
+ * MerchantInfoCard — read-only merchant identity sourced from Fonepay.
  */
 export function MerchantInfoCard({
   merchant,
   compact = false,
   style,
 }: MerchantInfoCardProps) {
+  const styles = useStyles();
+  const t = useTheme();
+
   return (
     <Card variant="surface" padding="md" style={style}>
-      {/* Read-Only Source Banner */}
       <View style={styles.sourceBanner}>
         <View style={styles.verifiedRow}>
-          <Icon name="shield-checkmark" size={14} color={colors.brand.primary} />
-          <Text style={styles.sourceText}>Fonepay Verified Merchant</Text>
+          <Icon name="shield-checkmark-outline" size={14} color={t.text.secondary} />
+          <Text style={styles.sourceText}>Fonepay verified merchant</Text>
         </View>
         <View style={styles.lockBadge}>
-          <Icon name="lock-closed" size={11} color={colors.text.muted} />
+          <Icon name="lock-closed" size={11} color={t.text.muted} />
           <Text style={styles.lockText}>Read-only</Text>
         </View>
       </View>
 
-      {/* Main Merchant Info */}
       <View style={styles.mainRow}>
         <View style={styles.iconBox}>
-          <Icon name="storefront-outline" size={24} color={colors.brand.primary} />
+          <Icon name="storefront-outline" size={22} color={t.text.secondary} />
         </View>
         <View style={styles.merchantDetails}>
           <Text style={styles.businessName}>{merchant.businessName}</Text>
           <View style={styles.panRow}>
-            <Text style={styles.panLabel}>PAN / VAT:</Text>
+            <Text style={styles.panLabel}>PAN / VAT</Text>
             <Text style={styles.panValue}>{merchant.panVatNumber}</Text>
           </View>
         </View>
@@ -74,7 +73,7 @@ export function MerchantInfoCard({
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((t) => ({
   sourceBanner: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -82,7 +81,7 @@ const styles = StyleSheet.create({
     paddingBottom: spacing.sm,
     marginBottom: spacing.md,
     borderBottomWidth: 1,
-    borderBottomColor: colors.border.subtle,
+    borderBottomColor: t.border.subtle,
   },
   verifiedRow: {
     flexDirection: 'row',
@@ -91,23 +90,17 @@ const styles = StyleSheet.create({
   },
   sourceText: {
     ...typography.label,
-    fontSize: 11,
-    color: colors.brand.primary,
-    letterSpacing: 0.3,
+    color: t.text.secondary,
   },
   lockBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: colors.background.subtle,
-    paddingHorizontal: spacing.sm,
-    paddingVertical: 2,
-    borderRadius: radius.small,
     gap: 3,
   },
   lockText: {
     ...typography.caption,
     fontSize: 10,
-    color: colors.text.muted,
+    color: t.text.muted,
   },
   mainRow: {
     flexDirection: 'row',
@@ -115,23 +108,20 @@ const styles = StyleSheet.create({
     gap: spacing.md,
   },
   iconBox: {
-    width: 46,
-    height: 46,
+    width: 44,
+    height: 44,
     borderRadius: radius.medium,
-    backgroundColor: colors.brand.muted,
+    backgroundColor: t.background.subtle,
     alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: 1,
-    borderColor: colors.brand.subtle,
   },
   merchantDetails: {
     flex: 1,
   },
   businessName: {
     ...typography.cardTitle,
-    fontSize: 17,
-    fontWeight: '700',
-    color: colors.text.primary,
+    fontSize: 16,
+    color: t.text.primary,
   },
   panRow: {
     flexDirection: 'row',
@@ -141,18 +131,18 @@ const styles = StyleSheet.create({
   },
   panLabel: {
     ...typography.caption,
-    color: colors.text.secondary,
+    color: t.text.muted,
   },
   panValue: {
     ...typography.invoiceNumber,
     fontSize: 12,
-    color: colors.text.primary,
+    color: t.text.secondary,
   },
   secondarySection: {
     marginTop: spacing.md,
     paddingTop: spacing.md,
     borderTopWidth: 1,
-    borderTopColor: colors.border.subtle,
+    borderTopColor: t.border.subtle,
   },
   metadataGrid: {
     flexDirection: 'row',
@@ -169,12 +159,12 @@ const styles = StyleSheet.create({
   },
   metaLabel: {
     ...typography.caption,
-    color: colors.text.muted,
+    color: t.text.muted,
     marginBottom: 2,
   },
   metaValue: {
     ...typography.bodySmall,
     fontWeight: '500',
-    color: colors.text.secondary,
+    color: t.text.secondary,
   },
-});
+}));

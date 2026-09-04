@@ -9,9 +9,11 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
-import { Colors } from '@/constants/colors';
-import { Spacing, BorderRadius } from '@/constants/spacing';
-import { Typography } from '@/constants/typography';
+import { Spacing } from '@/constants/spacing';
+import { radius } from '@/constants/radius';
+import { shadows } from '@/constants/shadows';
+import { typography } from '@/constants/typography';
+import { makeStyles, useTheme } from '@/theme';
 import { Icon } from './Icon';
 
 interface ModalProps {
@@ -22,6 +24,9 @@ interface ModalProps {
 }
 
 export function Modal({ visible, onClose, title, children }: ModalProps) {
+  const styles = useStyles();
+  const t = useTheme();
+
   return (
     <RNModal
       visible={visible}
@@ -41,7 +46,7 @@ export function Modal({ visible, onClose, title, children }: ModalProps) {
                     <TouchableOpacity
                       onPress={onClose}
                       hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
-                      <Icon name="close" size={22} color={Colors.textSecondary} />
+                      <Icon name="close" size={22} color={t.text.secondary} />
                     </TouchableOpacity>
                   </View>
                 )}
@@ -55,10 +60,10 @@ export function Modal({ visible, onClose, title, children }: ModalProps) {
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((t) => ({
   overlay: {
     flex: 1,
-    backgroundColor: Colors.overlay,
+    backgroundColor: t.overlay,
     justifyContent: 'center',
     alignItems: 'center',
     padding: Spacing.lg,
@@ -68,15 +73,11 @@ const styles = StyleSheet.create({
     maxWidth: 440,
   },
   content: {
-    backgroundColor: Colors.surface,
-    borderRadius: BorderRadius.xl,
+    backgroundColor: t.background.elevated,
+    borderRadius: radius.card,
     padding: Spacing.xl,
     width: '100%',
-    shadowColor: Colors.cardShadow,
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 1,
-    shadowRadius: 20,
-    elevation: 6,
+    ...shadows.elevated,
   },
   header: {
     flexDirection: 'row',
@@ -85,8 +86,7 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.lg,
   },
   title: {
-    fontSize: Typography.size.md,
-    fontWeight: Typography.weight.bold,
-    color: Colors.text,
+    ...typography.sectionTitle,
+    color: t.text.primary,
   },
-});
+}));

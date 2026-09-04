@@ -6,16 +6,17 @@ import { useAppContext } from '@/store/AppContext';
 import { usePayment } from '@/hooks/usePayment';
 import { Screen } from '@/components/layout/Screen';
 import { Button } from '@/components/ui/Button';
-import { Card } from '@/components/ui/Card';
-import { Badge } from '@/components/ui/Badge';
-import { Colors } from '@/constants/colors';
-import { Spacing, BorderRadius } from '@/constants/spacing';
-import { Typography } from '@/constants/typography';
+import { Spacing } from '@/constants/spacing';
+import { radius } from '@/constants/radius';
+import { typography, Typography } from '@/constants/typography';
 import { Icon } from '@/components/ui/Icon';
+import { makeStyles, useTheme } from '@/theme';
 import { formatNPR } from '@/utils/currency';
 
 export default function PaymentStatusScreen() {
   const router = useRouter();
+  const styles = useStyles();
+  const t = useTheme();
   const { currentSale, completeSale } = useSaleContext();
   const { merchant } = useAppContext();
   const {
@@ -31,281 +32,224 @@ export default function PaymentStatusScreen() {
     router.replace('/sales/success');
   };
 
+  const paid = paymentStatus === 'paid';
+  const failed = paymentStatus === 'failed';
+
   return (
     <Screen
-      headerProps={{
-        title: 'Fonepay Dynamic QR',
-        subtitle: currentSale.invoiceNumber,
-        showBack: paymentStatus !== 'paid',
-      }}
+      headerProps={{ title: 'Fonepay QR', showBack: !paid }}
+      backgroundColor={t.background.subtle}
       footer={
-        paymentStatus === 'paid' ? (
+        paid ? (
           <Button
-            title="Generate & View Official Bill"
+            title="Generate official bill"
             onPress={handleFinishSuccess}
             size="lg"
-            variant="primary"
-            rightIcon={<Icon name="arrow-forward" size={20} color={Colors.textInverse} />}
+            rightIcon={<Icon name="arrow-forward" size={20} color={t.text.inverse} />}
           />
-        ) : undefined
+        ) : (
+          <View style={styles.footerCol}>
+            <Button
+              title="Simulate payment received"
+              onPress={simulateSuccess}
+              loading={isVerifying}
+              disabled={isVerifying}
+              variant="outline"
+              size="lg"
+            />
+            <View style={styles.linkRow}>
+              {failed ? (
+                <Text onPress={resetSimulatedPayment} style={styles.link}>
+                  Reset QR
+                </Text>
+              ) : (
+                <Text
+                  onPress={isVerifying ? undefined : simulateFailure}
+                  style={[styles.link, styles.linkDanger]}>
+                  Cancel payment request
+                </Text>
+              )}
+            </View>
+          </View>
+        )
       }>
-      {/* QR & Status Card */}
-      <Card variant="surface" style={styles.qrCard}>
-        {/* Merchant & Fonepay Banner */}
-        <View style={styles.brandRow}>
-          <Text style={styles.merchantName}>{merchant.businessName}</Text>
-          <Badge status="fonepay" label="Fonepay QR" size="sm" />
-        </View>
+      <View style={styles.amountBlock}>
+        <Text style={styles.amountLabel}>Requesting</Text>
+        <Text style={styles.amount}>{formatNPR(currentSale.netAmount)}</Text>
+        <Text style={styles.amountMeta}>
+          {currentSale.items.length === 1 ? '1 item' : `${currentSale.items.length} items`}
+        </Text>
+      </View>
 
-        {/* Amount to Pay */}
-        <View style={styles.amountContainer}>
-          <Text style={styles.amountLabel}>Scan to Pay</Text>
-          <Text style={styles.amountText}>{formatNPR(currentSale.netAmount)}</Text>
-          <Text style={styles.invoiceText}>Invoice #{currentSale.invoiceNumber}</Text>
-        </View>
-
-        {/* QR Code Placeholder Box */}
+      <View style={styles.qrCard}>
         <View style={styles.qrBox}>
           {isVerifying ? (
-            <View style={styles.verifyingOverlay}>
-              <ActivityIndicator size="large" color={Colors.primary} />
-              <Text style={styles.verifyingText}>Verifying Payment...</Text>
+            <View style={styles.qrOverlay}>
+              <ActivityIndicator size="large" color={t.text.secondary} />
+              <Text style={styles.qrOverlayText}>Verifying payment…</Text>
             </View>
-          ) : paymentStatus === 'paid' ? (
-            <View style={styles.paidOverlay}>
-              <View style={styles.successCircle}>
-                <Icon name="checkmark" size={42} color={Colors.textInverse} />
+          ) : paid ? (
+            <View style={styles.qrOverlay}>
+              <View style={styles.paidCircle}>
+                <Icon name="checkmark" size={34} color={t.status.success} />
               </View>
-              <Text style={styles.paidTitle}>Payment Received!</Text>
-              <Text style={styles.paidSub}>Verified by Fonepay</Text>
             </View>
-          ) : paymentStatus === 'failed' ? (
-            <View style={styles.failedOverlay}>
+          ) : failed ? (
+            <View style={styles.qrOverlay}>
               <View style={styles.failedCircle}>
-                <Icon name="close" size={42} color={Colors.textInverse} />
+                <Icon name="close" size={34} color={t.status.error} />
               </View>
-              <Text style={styles.failedTitle}>Payment Failed</Text>
-              <Text style={styles.failedSub}>Customer cancelled or timed out</Text>
             </View>
           ) : (
-            <View style={styles.qrVisual}>
-              <Icon name="qr-code-outline" size={160} color={Colors.text} />
-              <Text style={styles.qrScanHint}>Ask customer to scan with any bank/wallet app</Text>
-            </View>
+            <Icon name="qr-code" size={168} color={t.text.primary} />
           )}
         </View>
+        <Text style={styles.merchantName}>{merchant.businessName}</Text>
+      </View>
 
-        {/* Current Status Indicator */}
-        <View style={styles.statusIndicatorRow}>
-          <Text style={styles.statusLabel}>Status:</Text>
-          <Badge status={paymentStatus} size="md" />
-        </View>
-      </Card>
-
-      {/* Prototype Presenter Controls */}
-      <Card variant="accent" style={styles.prototypeControlCard}>
-        <View style={styles.controlHeaderRow}>
-          <Icon name="information-circle-outline" size={18} color={Colors.primary} />
-          <Text style={styles.controlTitle}>Prototype Simulator Controls</Text>
-        </View>
-        <Text style={styles.controlDesc}>
-          Simulate the merchant receiving instant notification from Fonepay:
-        </Text>
-
-        <View style={styles.controlButtons}>
-          <Button
-            title="Simulate: Customer Paid"
-            onPress={simulateSuccess}
-            loading={isVerifying}
-            disabled={isVerifying || paymentStatus === 'paid'}
-            variant="primary"
-            size="md"
-            leftIcon={<Icon name="checkmark-circle" size={18} color={Colors.textInverse} />}
-          />
-
-          <View style={styles.controlSubButtons}>
-            <Button
-              title="Simulate Failure"
-              onPress={simulateFailure}
-              disabled={isVerifying || paymentStatus === 'paid'}
-              variant="danger"
-              size="sm"
-              fullWidth={false}
-              style={styles.subBtn}
-            />
-            <Button
-              title="Reset QR"
-              onPress={resetSimulatedPayment}
-              disabled={isVerifying || paymentStatus === 'pending'}
-              variant="outline"
-              size="sm"
-              fullWidth={false}
-              style={styles.subBtn}
-            />
+      <View style={styles.statusWrap}>
+        {paid ? (
+          <View style={[styles.statusPill, { backgroundColor: t.status.successBackground }]}>
+            <Icon name="checkmark-circle" size={14} color={t.status.success} />
+            <Text style={[styles.statusText, { color: t.status.success }]}>Payment received</Text>
           </View>
-        </View>
-      </Card>
+        ) : failed ? (
+          <View style={[styles.statusPill, { backgroundColor: t.status.errorBackground }]}>
+            <Icon name="close-circle" size={14} color={t.status.error} />
+            <Text style={[styles.statusText, { color: t.status.error }]}>Payment failed</Text>
+          </View>
+        ) : (
+          <View style={[styles.statusPill, { backgroundColor: t.status.pendingBackground }]}>
+            <View style={styles.pendingDot} />
+            <Text style={[styles.statusText, { color: t.status.pending }]}>
+              Waiting for payment
+            </Text>
+          </View>
+        )}
+      </View>
+
+      <Text style={styles.helper}>
+        Ask the customer to scan with any Fonepay-enabled mobile banking or wallet app.
+        This bill updates the moment payment settles.
+      </Text>
     </Screen>
   );
 }
 
-const styles = StyleSheet.create({
-  qrCard: {
-    padding: Spacing.xl,
+const useStyles = makeStyles((t) => ({
+  amountBlock: {
     alignItems: 'center',
-    marginBottom: Spacing.lg,
-  },
-  brandRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    width: '100%',
-    marginBottom: Spacing.md,
-    paddingBottom: Spacing.sm,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.borderSubtle,
-  },
-  merchantName: {
-    fontSize: Typography.size.sm,
-    fontWeight: Typography.weight.bold,
-    color: Colors.text,
-  },
-  amountContainer: {
-    alignItems: 'center',
-    marginBottom: Spacing.lg,
+    paddingTop: Spacing.sm,
+    gap: 3,
   },
   amountLabel: {
-    fontSize: Typography.size.xs,
-    color: Colors.textMuted,
-    textTransform: 'uppercase',
-    marginBottom: 2,
+    ...typography.label,
+    color: t.text.secondary,
   },
-  amountText: {
-    fontSize: Typography.size.display,
-    fontWeight: Typography.weight.heavy,
-    color: Colors.primary,
-    marginBottom: 2,
+  amount: {
+    ...typography.display,
+    fontSize: 34,
+    lineHeight: 40,
+    color: t.text.primary,
   },
-  invoiceText: {
-    fontSize: Typography.size.xs,
-    color: Colors.textSecondary,
+  amountMeta: {
+    ...typography.invoiceNumber,
+    fontFamily: Typography.family.mono,
+    color: t.text.secondary,
+  },
+  qrCard: {
+    alignSelf: 'center',
+    marginTop: Spacing.lg,
+    backgroundColor: t.background.surface,
+    borderWidth: 1,
+    borderColor: t.border.default,
+    borderRadius: radius.card,
+    padding: Spacing.xl,
+    alignItems: 'center',
+    gap: Spacing.md,
   },
   qrBox: {
-    width: 240,
-    height: 240,
-    backgroundColor: Colors.surface,
-    borderWidth: 2,
-    borderColor: Colors.border,
-    borderRadius: BorderRadius.xl,
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: Spacing.md,
-    marginBottom: Spacing.lg,
-  },
-  qrVisual: {
+    width: 200,
+    height: 200,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  qrScanHint: {
-    fontSize: Typography.size.xxs,
-    color: Colors.textMuted,
-    textAlign: 'center',
-    marginTop: 4,
-  },
-  verifyingOverlay: {
+  qrOverlay: {
     alignItems: 'center',
     justifyContent: 'center',
     gap: Spacing.md,
   },
-  verifyingText: {
-    fontSize: Typography.size.sm,
-    fontWeight: Typography.weight.semibold,
-    color: Colors.text,
+  qrOverlayText: {
+    ...typography.bodyMedium,
+    color: t.text.secondary,
   },
-  paidOverlay: {
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  successCircle: {
-    width: 68,
-    height: 68,
-    borderRadius: 34,
-    backgroundColor: Colors.success,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: Spacing.md,
-  },
-  paidTitle: {
-    fontSize: Typography.size.md,
-    fontWeight: Typography.weight.bold,
-    color: Colors.successText,
-    marginBottom: 2,
-  },
-  paidSub: {
-    fontSize: Typography.size.xs,
-    color: Colors.textSecondary,
-  },
-  failedOverlay: {
+  paidCircle: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: t.status.successBackground,
     alignItems: 'center',
     justifyContent: 'center',
   },
   failedCircle: {
-    width: 68,
-    height: 68,
-    borderRadius: 34,
-    backgroundColor: Colors.failed,
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: t.status.errorBackground,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: Spacing.md,
   },
-  failedTitle: {
-    fontSize: Typography.size.md,
-    fontWeight: Typography.weight.bold,
-    color: Colors.failedText,
-    marginBottom: 2,
+  merchantName: {
+    ...typography.caption,
+    fontWeight: '600',
+    color: t.text.secondary,
   },
-  failedSub: {
-    fontSize: Typography.size.xs,
-    color: Colors.textSecondary,
+  statusWrap: {
+    alignItems: 'center',
+    marginTop: Spacing.lg,
   },
-  statusIndicatorRow: {
+  statusPill: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: Spacing.sm,
+    gap: 8,
+    borderRadius: radius.pill,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: 9,
   },
-  statusLabel: {
-    fontSize: Typography.size.sm,
-    fontWeight: Typography.weight.medium,
-    color: Colors.textSecondary,
+  statusText: {
+    ...typography.caption,
+    fontWeight: '700',
   },
-  prototypeControlCard: {
-    padding: Spacing.lg,
-    marginBottom: Spacing.xl,
+  pendingDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: t.status.pending,
   },
-  controlHeaderRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
+  helper: {
+    ...typography.caption,
+    color: t.text.secondary,
+    textAlign: 'center',
+    lineHeight: 18,
+    marginTop: Spacing.lg,
+    paddingHorizontal: Spacing.xl,
+  },
+  footerCol: {
+    width: '100%',
     gap: Spacing.xs,
-    marginBottom: 4,
   },
-  controlTitle: {
-    fontSize: Typography.size.sm,
-    fontWeight: Typography.weight.bold,
-    color: Colors.primaryDark,
+  linkRow: {
+    alignItems: 'center',
+    paddingVertical: 6,
   },
-  controlDesc: {
-    fontSize: Typography.size.xs,
-    color: Colors.textSecondary,
-    marginBottom: Spacing.md,
+  link: {
+    ...typography.bodySmall,
+    fontWeight: '600',
+    color: t.text.secondary,
+    textDecorationLine: 'underline',
+    padding: 4,
   },
-  controlButtons: {
-    gap: Spacing.sm,
+  linkDanger: {
+    color: t.status.error,
   },
-  controlSubButtons: {
-    flexDirection: 'row',
-    gap: Spacing.sm,
-  },
-  subBtn: {
-    flex: 1,
-  },
-});
+}));

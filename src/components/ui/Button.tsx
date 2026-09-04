@@ -9,12 +9,11 @@ import {
   TextStyle,
   View,
 } from 'react-native';
-import { colors } from '@/constants/colors';
 import { spacing } from '@/constants/spacing';
 import { radius } from '@/constants/radius';
 import { typography } from '@/constants/typography';
-import { shadows } from '@/constants/shadows';
 import { motion } from '@/constants/motion';
+import { makeStyles, useTheme } from '@/theme';
 
 export type ButtonVariant = 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger';
 export type ButtonSize = 'sm' | 'md' | 'lg';
@@ -48,6 +47,8 @@ export function Button({
   textStyle,
   testID,
 }: ButtonProps) {
+  const styles = useStyles();
+  const t = useTheme();
   const isInteractive = !disabled && !loading;
   const scaleAnim = useRef(new Animated.Value(1)).current;
 
@@ -70,9 +71,10 @@ export function Button({
   };
 
   const getLoaderColor = () => {
-    if (variant === 'primary') return colors.text.inverse;
-    if (variant === 'secondary') return colors.text.primary;
-    return colors.brand.primary;
+    if (variant === 'primary') return t.text.inverse;
+    if (variant === 'danger') return t.status.error;
+    if (variant === 'secondary' || variant === 'ghost') return t.text.primary;
+    return t.text.primary;
   };
 
   return (
@@ -93,9 +95,9 @@ export function Button({
           styles.base,
           styles[size],
           styles[variant],
-          variant === 'primary' && !disabled && styles.primaryShadow,
           fullWidth && styles.fullWidth,
           disabled && styles.disabled,
+          pressed && isInteractive && styles.pressed,
           style,
         ]}>
         {loading ? (
@@ -121,21 +123,15 @@ export function Button({
   );
 }
 
-/**
- * Explicit Primary CTA wrapper
- */
 export function PrimaryButton(props: Omit<ButtonProps, 'variant'>) {
   return <Button {...props} variant="primary" />;
 }
 
-/**
- * Explicit Secondary Action wrapper (for Edit, Cancel, Details, Secondary navigation)
- */
 export function SecondaryButton(props: Omit<ButtonProps, 'variant'>) {
   return <Button {...props} variant="secondary" />;
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((t) => ({
   fullWidthContainer: {
     width: '100%',
   },
@@ -149,6 +145,9 @@ const styles = StyleSheet.create({
   fullWidth: {
     width: '100%',
   },
+  pressed: {
+    opacity: 0.92,
+  },
   content: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -161,69 +160,60 @@ const styles = StyleSheet.create({
     marginLeft: spacing.sm,
   },
 
-  // Touch Target Sizes (comfortable 38pt / 48pt / 56pt)
+  // Sizes
   sm: {
-    minHeight: 38,
+    minHeight: 36,
     paddingVertical: spacing.xs,
     paddingHorizontal: spacing.md,
     borderRadius: radius.medium,
   },
   md: {
-    minHeight: 48,
-    paddingVertical: spacing.md,
+    minHeight: 46,
+    paddingVertical: spacing.sm,
     paddingHorizontal: spacing.lg,
     borderRadius: radius.large,
   },
   lg: {
-    minHeight: 56,
-    paddingVertical: spacing.lg,
+    minHeight: 52,
+    paddingVertical: spacing.md,
     paddingHorizontal: spacing.xl,
     borderRadius: radius.large,
   },
 
-  // Primary variant
+  // Variants
   primary: {
-    backgroundColor: colors.brand.primary,
+    backgroundColor: t.brand.primary,
+    shadowColor: t.brand.primary,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.22,
+    shadowRadius: 10,
+    elevation: 2,
   },
-  primaryShadow: {
-    ...shadows.primaryGlow,
-  },
-
-  // Secondary variant (soft, non-competing)
   secondary: {
-    backgroundColor: colors.background.subtle,
+    backgroundColor: t.background.surface,
     borderWidth: 1,
-    borderColor: colors.border.default,
+    borderColor: t.border.default,
   },
-
-  // Outline variant
   outline: {
     backgroundColor: 'transparent',
-    borderWidth: 1.5,
-    borderColor: colors.brand.primary,
+    borderWidth: 1,
+    borderColor: t.border.strong,
   },
-
-  // Ghost variant
   ghost: {
     backgroundColor: 'transparent',
   },
-
-  // Danger variant
   danger: {
-    backgroundColor: colors.status.errorBackground,
+    backgroundColor: t.status.errorBackground,
     borderWidth: 1,
-    borderColor: colors.status.error,
+    borderColor: t.status.error,
   },
 
-  // Disabled state
   disabled: {
-    backgroundColor: colors.background.subtle,
-    borderColor: colors.border.subtle,
-    shadowOpacity: 0,
-    elevation: 0,
+    backgroundColor: t.background.subtle,
+    borderColor: t.border.subtle,
   },
 
-  // Typography
+  // Text
   baseText: {
     ...typography.button,
     textAlign: 'center',
@@ -234,30 +224,29 @@ const styles = StyleSheet.create({
   },
   mdText: {
     fontSize: 15,
-    lineHeight: 22,
+    lineHeight: 20,
   },
   lgText: {
-    fontSize: 17,
-    fontWeight: '700',
-    lineHeight: 24,
+    fontSize: 16,
+    lineHeight: 22,
   },
 
   primaryText: {
-    color: colors.text.inverse,
+    color: t.text.inverse,
   },
   secondaryText: {
-    color: colors.text.primary,
+    color: t.text.primary,
   },
   outlineText: {
-    color: colors.brand.primary,
+    color: t.text.primary,
   },
   ghostText: {
-    color: colors.text.secondary,
+    color: t.text.primary,
   },
   dangerText: {
-    color: colors.status.error,
+    color: t.status.error,
   },
   disabledText: {
-    color: colors.text.muted,
+    color: t.text.muted,
   },
-});
+}));

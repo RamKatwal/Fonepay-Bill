@@ -1,8 +1,8 @@
 import React from 'react';
 import { View, StyleSheet, ViewStyle, Platform } from 'react-native';
-import { colors } from '@/constants/colors';
 import { spacing } from '@/constants/spacing';
 import { shadows } from '@/constants/shadows';
+import { makeStyles } from '@/theme';
 
 export interface BottomActionBarProps {
   children: React.ReactNode;
@@ -11,14 +11,14 @@ export interface BottomActionBarProps {
 }
 
 /**
- * Sticky Bottom Action Bar
- * Houses primary and secondary CTAs with predictable placement and elevation
+ * Sticky bottom action bar — primary/secondary CTAs with predictable placement.
  */
 export function BottomActionBar({
   children,
   style,
   contentStyle,
 }: BottomActionBarProps) {
+  const styles = useStyles();
   return (
     <View style={[styles.container, style]}>
       <View style={[styles.content, contentStyle]}>{children}</View>
@@ -26,11 +26,11 @@ export function BottomActionBar({
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((t) => ({
   container: {
-    backgroundColor: colors.background.surface,
+    backgroundColor: t.background.canvas,
     borderTopWidth: 1,
-    borderTopColor: colors.border.default,
+    borderTopColor: t.border.subtle,
     paddingHorizontal: spacing.lg,
     paddingTop: spacing.md,
     paddingBottom: Platform.OS === 'ios' ? spacing.xl : spacing.lg,
@@ -45,4 +45,4 @@ const styles = StyleSheet.create({
     width: '100%',
     alignSelf: 'center',
   },
-});
+}));

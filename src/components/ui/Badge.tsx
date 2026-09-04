@@ -1,9 +1,8 @@
 import React from 'react';
 import { View, Text, StyleSheet, ViewStyle } from 'react-native';
-import { colors } from '@/constants/colors';
 import { spacing } from '@/constants/spacing';
 import { radius } from '@/constants/radius';
-import { typography } from '@/constants/typography';
+import { makeStyles, useTheme, type Palette } from '@/theme';
 import { Icon, IconName } from './Icon';
 
 export type BadgeStatus = 'paid' | 'pending' | 'failed' | 'cash' | 'fonepay';
@@ -17,55 +16,44 @@ export interface BadgeProps {
   showIcon?: boolean;
 }
 
-const statusConfig: Record<
+function statusConfig(t: Palette): Record<
   BadgeStatus,
-  {
-    backgroundColor: string;
-    textColor: string;
-    defaultLabel: string;
-    icon: IconName;
-  }
-> = {
-  // Paid: Check + Paid
-  paid: {
-    backgroundColor: colors.status.paidBackground,
-    textColor: colors.status.paid,
-    defaultLabel: 'Paid',
-    icon: 'checkmark-circle',
-  },
-
-  // Pending: Clock + Pending
-  pending: {
-    backgroundColor: colors.status.pendingBackground,
-    textColor: colors.status.pending,
-    defaultLabel: 'Pending',
-    icon: 'time-outline',
-  },
-
-  // Failed: Close + Failed
-  failed: {
-    backgroundColor: colors.status.failedBackground,
-    textColor: colors.status.failed,
-    defaultLabel: 'Failed',
-    icon: 'close-circle',
-  },
-
-  // Cash payment badge
-  cash: {
-    backgroundColor: colors.payment.cashBackground,
-    textColor: colors.payment.cashText,
-    defaultLabel: 'Cash',
-    icon: 'cash-outline',
-  },
-
-  // Fonepay payment badge
-  fonepay: {
-    backgroundColor: colors.payment.fonepayBackground,
-    textColor: colors.payment.fonepayText,
-    defaultLabel: 'Fonepay',
-    icon: 'qr-code-outline',
-  },
-};
+  { backgroundColor: string; textColor: string; defaultLabel: string; icon: IconName }
+> {
+  return {
+    paid: {
+      backgroundColor: t.status.paidBackground,
+      textColor: t.status.paid,
+      defaultLabel: 'Paid',
+      icon: 'checkmark-circle',
+    },
+    pending: {
+      backgroundColor: t.status.pendingBackground,
+      textColor: t.status.pending,
+      defaultLabel: 'Pending',
+      icon: 'time-outline',
+    },
+    failed: {
+      backgroundColor: t.status.failedBackground,
+      textColor: t.status.failed,
+      defaultLabel: 'Failed',
+      icon: 'close-circle',
+    },
+    // Payment channels — neutral, differentiated by icon + label only.
+    cash: {
+      backgroundColor: t.background.subtle,
+      textColor: t.text.secondary,
+      defaultLabel: 'Cash',
+      icon: 'cash-outline',
+    },
+    fonepay: {
+      backgroundColor: t.background.subtle,
+      textColor: t.text.secondary,
+      defaultLabel: 'Fonepay',
+      icon: 'qr-code-outline',
+    },
+  };
+}
 
 export function Badge({
   status,
@@ -74,7 +62,9 @@ export function Badge({
   style,
   showIcon = true,
 }: BadgeProps) {
-  const config = statusConfig[status];
+  const styles = useStyles();
+  const t = useTheme();
+  const config = statusConfig(t)[status];
   const displayLabel = label || config.defaultLabel;
   const isSm = size === 'sm';
 
@@ -88,11 +78,7 @@ export function Badge({
       ]}>
       {showIcon && (
         <View style={styles.iconContainer}>
-          <Icon
-            name={config.icon}
-            size={isSm ? 12 : 14}
-            color={config.textColor}
-          />
+          <Icon name={config.icon} size={isSm ? 12 : 13} color={config.textColor} />
         </View>
       )}
       <Text
@@ -107,7 +93,7 @@ export function Badge({
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles(() => ({
   base: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -116,11 +102,11 @@ const styles = StyleSheet.create({
   },
   smContainer: {
     paddingHorizontal: spacing.sm,
-    paddingVertical: 3,
+    paddingVertical: 2,
   },
   mdContainer: {
     paddingHorizontal: spacing.md,
-    paddingVertical: spacing.xs,
+    paddingVertical: 4,
   },
   iconContainer: {
     marginRight: 4,
@@ -137,4 +123,4 @@ const styles = StyleSheet.create({
     fontSize: 12,
     lineHeight: 16,
   },
-});
+}));

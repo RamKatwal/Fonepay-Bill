@@ -1,6 +1,6 @@
 import React from 'react';
 import { Ionicons } from '@expo/vector-icons';
-import { Colors } from '@/constants/colors';
+import { useTheme } from '@/theme';
 
 export type IconName = keyof typeof Ionicons.glyphMap;
 
@@ -10,6 +10,7 @@ interface IconProps {
   color?: string;
 }
 
-export function Icon({ name, size = 22, color = Colors.text }: IconProps) {
-  return <Ionicons name={name} size={size} color={color} />;
+export function Icon({ name, size = 22, color }: IconProps) {
+  const t = useTheme();
+  return <Ionicons name={name} size={size} color={color ?? t.text.secondary} />;
 }

@@ -36,15 +36,13 @@ function createFreshSale(): Sale {
   const date = getCurrentDateFormatted();
   const time = getCurrentTimeFormatted();
   const id = `sale-${Date.now()}`;
-  const invoiceNumber = generateInvoiceNumber();
-  const transactionId = generateTransactionId();
 
   return {
     id,
-    invoiceNumber,
+    invoiceNumber: '',
     invoiceDate: date,
     invoiceTime: time,
-    transactionId,
+    transactionId: '',
     items: [],
     subtotal: 0,
     discount: 0,
@@ -162,17 +160,33 @@ export function SaleContextProvider({ children }: { children: React.ReactNode })
   }, []);
 
   const completeSale = useCallback((): Transaction => {
+    const invoiceNumber = currentSale.invoiceNumber || generateInvoiceNumber();
+    const transactionId = currentSale.transactionId || generateTransactionId();
+    const invoiceDate = getCurrentDateFormatted();
+    const invoiceTime = getCurrentTimeFormatted();
+
+    const finalizedSale: Sale = {
+      ...currentSale,
+      invoiceNumber,
+      transactionId,
+      invoiceDate,
+      invoiceTime,
+      paymentStatus: 'paid',
+    };
+
+    setCurrentSale(finalizedSale);
+
     const transaction: Transaction = {
-      id: currentSale.id,
-      invoiceNumber: currentSale.invoiceNumber,
-      date: currentSale.invoiceDate,
-      time: currentSale.invoiceTime,
-      amount: currentSale.netAmount,
-      paymentMode: currentSale.paymentMode || 'cash',
-      paymentStatus: currentSale.paymentStatus || 'paid',
-      itemsCount: currentSale.items.length,
-      customerName: currentSale.customerName,
-      saleDetails: currentSale,
+      id: finalizedSale.id,
+      invoiceNumber: finalizedSale.invoiceNumber,
+      date: finalizedSale.invoiceDate,
+      time: finalizedSale.invoiceTime,
+      amount: finalizedSale.netAmount,
+      paymentMode: finalizedSale.paymentMode || 'cash',
+      paymentStatus: 'paid',
+      itemsCount: finalizedSale.items.length,
+      customerName: finalizedSale.customerName,
+      saleDetails: finalizedSale,
     };
 
     addTransaction(transaction);

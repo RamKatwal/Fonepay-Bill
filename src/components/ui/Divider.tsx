@@ -1,8 +1,8 @@
 import React from 'react';
 import { View, StyleSheet, ViewStyle, Text } from 'react-native';
-import { Colors } from '@/constants/colors';
 import { Spacing } from '@/constants/spacing';
-import { Typography } from '@/constants/typography';
+import { typography } from '@/constants/typography';
+import { makeStyles } from '@/theme';
 
 interface DividerProps {
   style?: ViewStyle;
@@ -11,6 +11,8 @@ interface DividerProps {
 }
 
 export function Divider({ style, label, dashed }: DividerProps) {
+  const styles = useStyles();
+
   if (label) {
     return (
       <View style={[styles.labelContainer, style]}>
@@ -24,16 +26,16 @@ export function Divider({ style, label, dashed }: DividerProps) {
   return <View style={[styles.line, dashed && styles.dashed, style]} />;
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((t) => ({
   line: {
     height: 1,
-    backgroundColor: Colors.border,
+    backgroundColor: t.border.subtle,
     width: '100%',
   },
   dashed: {
     borderStyle: 'dashed',
     borderWidth: 0.5,
-    borderColor: Colors.borderDark,
+    borderColor: t.border.default,
     backgroundColor: 'transparent',
   },
   labelContainer: {
@@ -43,8 +45,8 @@ const styles = StyleSheet.create({
   },
   labelText: {
     paddingHorizontal: Spacing.md,
-    fontSize: Typography.size.xs,
-    color: Colors.textMuted,
-    fontWeight: Typography.weight.medium,
+    ...typography.caption,
+    color: t.text.muted,
+    fontWeight: '500',
   },
-});
+}));

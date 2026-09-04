@@ -4,10 +4,10 @@ import { Transaction } from '@/types/transaction';
 import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { Icon } from '@/components/ui/Icon';
-import { colors } from '@/constants/colors';
 import { spacing } from '@/constants/spacing';
 import { radius } from '@/constants/radius';
 import { typography } from '@/constants/typography';
+import { makeStyles, useTheme } from '@/theme';
 import { formatNPR } from '@/utils/currency';
 
 export interface TransactionCardProps {
@@ -17,14 +17,15 @@ export interface TransactionCardProps {
 }
 
 /**
- * TransactionCard
- * Groups invoice information, prominent monetary amount, payment channel, and semantic status.
+ * TransactionCard — invoice, amount, payment channel, and status.
  */
 export function TransactionCard({
   transaction,
   onPress,
   style,
 }: TransactionCardProps) {
+  const styles = useStyles();
+  const t = useTheme();
   const isFonepay = transaction.paymentMode === 'fonepay';
 
   return (
@@ -34,36 +35,25 @@ export function TransactionCard({
       onPress={onPress}
       style={[styles.card, style]}>
       <View style={styles.row}>
-        {/* Payment Mode Icon Visual */}
-        <View
-          style={[
-            styles.iconBox,
-            isFonepay ? styles.fonepayIconBox : styles.cashIconBox,
-          ]}>
+        <View style={styles.iconBox}>
           <Icon
             name={isFonepay ? 'qr-code-outline' : 'cash-outline'}
             size={20}
-            color={isFonepay ? colors.brand.primary : colors.payment.cash}
+            color={t.text.secondary}
           />
         </View>
 
-        {/* Content Details */}
         <View style={styles.content}>
-          {/* Top Row: Invoice Number & Prominent Amount */}
           <View style={styles.topRow}>
             <Text style={styles.invoiceNumber}>{transaction.invoiceNumber}</Text>
             <Text style={styles.amount}>{formatNPR(transaction.amount)}</Text>
           </View>
 
-          {/* Bottom Row: Timestamp & Status Badges */}
           <View style={styles.bottomRow}>
             <Text style={styles.timestamp}>
               {transaction.date} • {transaction.time}
             </Text>
-            <View style={styles.badges}>
-              <Badge status={transaction.paymentMode} size="sm" />
-              <Badge status={transaction.paymentStatus} size="sm" />
-            </View>
+            <Badge status={transaction.paymentMode} size="sm" />
           </View>
         </View>
       </View>
@@ -71,7 +61,7 @@ export function TransactionCard({
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((t) => ({
   card: {
     marginBottom: 0,
   },
@@ -81,17 +71,12 @@ const styles = StyleSheet.create({
     gap: spacing.md,
   },
   iconBox: {
-    width: 42,
-    height: 42,
+    width: 40,
+    height: 40,
     borderRadius: radius.medium,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  fonepayIconBox: {
-    backgroundColor: colors.brand.muted,
-  },
-  cashIconBox: {
-    backgroundColor: colors.payment.cashBackground,
+    backgroundColor: t.background.subtle,
   },
   content: {
     flex: 1,
@@ -104,13 +89,12 @@ const styles = StyleSheet.create({
   },
   invoiceNumber: {
     ...typography.invoiceNumber,
-    fontSize: 13,
-    color: colors.text.primary,
+    color: t.text.secondary,
   },
   amount: {
     ...typography.amount,
     fontSize: 16,
-    color: colors.text.primary,
+    color: t.text.primary,
   },
   bottomRow: {
     flexDirection: 'row',
@@ -119,11 +103,6 @@ const styles = StyleSheet.create({
   },
   timestamp: {
     ...typography.caption,
-    color: colors.text.muted,
+    color: t.text.muted,
   },
-  badges: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-  },
-});
+}));

@@ -1,25 +1,24 @@
 import React, { useState } from 'react';
-import { View, StyleSheet } from 'react-native';
+import { View, Text } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useAppContext } from '@/store/AppContext';
 import { useSaleContext } from '@/store/SaleContext';
 import { Screen } from '@/components/layout/Screen';
-import { Button } from '@/components/ui/Button';
+import { PrimaryButton } from '@/components/ui/Button';
+import { Icon } from '@/components/ui/Icon';
 import { BillPreview } from '@/components/bill/BillPreview';
 import { ShareBillModal } from '@/components/bill/ShareBillModal';
-import { Colors } from '@/constants/colors';
 import { Spacing } from '@/constants/spacing';
-import { Icon } from '@/components/ui/Icon';
+import { typography } from '@/constants/typography';
+import { makeStyles, useTheme } from '@/theme';
 
 export default function GeneratedBillScreen() {
   const router = useRouter();
+  const styles = useStyles();
+  const t = useTheme();
   const { merchant } = useAppContext();
   const { currentSale, resetSale } = useSaleContext();
   const [isShareModalVisible, setIsShareModalVisible] = useState(false);
-
-  const handleShareBill = () => {
-    setIsShareModalVisible(true);
-  };
 
   const handleBackToDashboard = () => {
     resetSale();
@@ -28,34 +27,29 @@ export default function GeneratedBillScreen() {
 
   return (
     <Screen
+      backgroundColor={t.background.subtle}
       headerProps={{
-        title: 'Tax Invoice',
+        title: 'Bill',
         subtitle: currentSale.invoiceNumber,
         showBack: false,
       }}
       footer={
-        <View style={styles.footerRow}>
-          <Button
-            title="Share Bill"
-            onPress={handleShareBill}
-            variant="outline"
-            fullWidth={false}
+        <View style={styles.footerCol}>
+          <PrimaryButton
+            title="Share"
+            onPress={() => setIsShareModalVisible(true)}
             size="lg"
-            leftIcon={<Icon name="share-social-outline" size={20} color={Colors.primary} />}
-            style={styles.shareBtn}
+            leftIcon={<Icon name="share-outline" size={20} color={t.text.inverse} />}
           />
-          <Button
-            title="Back to Dashboard"
-            onPress={handleBackToDashboard}
-            variant="primary"
-            fullWidth={false}
-            size="lg"
-            style={styles.doneBtn}
-          />
+          <View style={styles.linkRow}>
+            <Text onPress={handleBackToDashboard} style={styles.link}>
+              Back to dashboard
+            </Text>
+          </View>
         </View>
       }>
       <View style={styles.content}>
-        <BillPreview sale={currentSale} merchant={merchant} isOfficial={true} />
+        <BillPreview sale={currentSale} merchant={merchant} isOfficial />
       </View>
 
       <ShareBillModal
@@ -63,24 +57,29 @@ export default function GeneratedBillScreen() {
         onClose={() => setIsShareModalVisible(false)}
         sale={currentSale}
         merchant={merchant}
-        isOfficial={true}
+        isOfficial
       />
     </Screen>
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((t) => ({
   content: {
     paddingBottom: Spacing.xl,
   },
-  footerRow: {
-    flexDirection: 'row',
-    gap: Spacing.md,
+  footerCol: {
+    width: '100%',
+    gap: Spacing.xs,
   },
-  shareBtn: {
-    flex: 1,
+  linkRow: {
+    alignItems: 'center',
+    paddingVertical: 6,
   },
-  doneBtn: {
-    flex: 1.5,
+  link: {
+    ...typography.bodySmall,
+    fontWeight: '600',
+    color: t.text.secondary,
+    textDecorationLine: 'underline',
+    padding: 4,
   },
-});
+}));

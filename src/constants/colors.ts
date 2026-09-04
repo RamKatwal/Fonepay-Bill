@@ -1,114 +1,61 @@
 /**
- * Fonepay Digital Bill Generator - Semantic Color System
- * Original Fonepay visual identity (Crimson/Nepal Red, Deep Slate, Clean Card Surfaces)
+ * @deprecated Prefer `useTheme()` / `makeStyles` from `@/theme` so components
+ * react to light/dark. This module is a static shim that always resolves to the
+ * LIGHT palette, kept so any not-yet-migrated call site still compiles and
+ * renders correctly in light mode.
  */
+import { lightPalette, type Palette } from '@/theme/palette';
 
-export const colors = {
-  brand: {
-    primary: '#DC2626', // Classic Fonepay Red
-    primaryDark: '#B91C1C',
-    primaryLight: '#EF4444',
-    secondary: '#0F172A', // Slate 900
-    subtle: '#FEE2E2',
-    muted: '#FEF2F2',
-  },
+// Nested shape (old `colors`)
+export const colors = lightPalette;
 
-  background: {
-    canvas: '#F8FAFC', // Slate 50 screen background
-    surface: '#FFFFFF', // Card and container surface
-    elevated: '#FFFFFF', // Modals and elevated sheets
-    subtle: '#F1F5F9', // Slate 100 secondary backgrounds
-  },
-
-  text: {
-    primary: '#0F172A', // Main headings and primary reading
-    secondary: '#475569', // Subheadings and supporting labels
-    muted: '#94A3B8', // Placeholder, timestamps, and subtle hints
-    inverse: '#FFFFFF', // Contrast text on dark/brand backgrounds
-    brand: '#DC2626', // Brand accent links and values
-  },
-
-  border: {
-    default: '#E2E8F0', // Card and input borders
-    subtle: '#F1F5F9', // Dividers and subtle separators
-    strong: '#CBD5E1', // High-contrast structural boundaries
-  },
-
-  status: {
-    success: '#16A34A', // Paid / Verified green
-    successBackground: '#DCFCE7',
-    warning: '#D97706', // Warning amber
-    warningBackground: '#FEF3C7',
-    error: '#DC2626', // Failed / Error red
-    errorBackground: '#FEE2E2',
-    pending: '#D97706', // Payment pending
-    pendingBackground: '#FEF3C7',
-    paid: '#16A34A',
-    paidBackground: '#DCFCE7',
-    failed: '#DC2626',
-    failedBackground: '#FEE2E2',
-  },
-
-  payment: {
-    cash: '#0284C7', // Sky 600
-    cashBackground: '#E0F2FE', // Sky 100
-    cashText: '#0369A1',
-    fonepay: '#DC2626', // Crimson 600
-    fonepayBackground: '#FEE2E2', // Crimson 100
-    fonepayText: '#B91C1C',
-  },
-} as const;
-
-export type ColorTokens = typeof colors;
-
-/**
- * Backward compatibility alias for existing code
- */
+// Flat shape (old `Colors`)
 export const Colors = {
-  primary: colors.brand.primary,
-  primaryDark: colors.brand.primaryDark,
-  primaryLight: colors.brand.primaryLight,
-  primarySubtle: colors.brand.subtle,
-  primaryMuted: colors.brand.muted,
+  primary: lightPalette.brand.primary,
+  primaryDark: lightPalette.brand.primaryPressed,
+  primaryLight: lightPalette.brand.primaryLight,
+  primarySubtle: lightPalette.brand.subtle,
+  primaryMuted: lightPalette.brand.muted,
+  secondary: lightPalette.brand.secondary,
+  accent: lightPalette.brand.primary,
 
-  secondary: colors.brand.secondary,
-  accent: '#E11D48',
+  background: lightPalette.background.canvas,
+  surface: lightPalette.background.surface,
+  surfaceSubtle: lightPalette.background.subtle,
+  surfaceSelected: lightPalette.background.selected,
 
-  background: colors.background.canvas,
-  surface: colors.background.surface,
-  surfaceSubtle: colors.background.subtle,
-  surfaceSelected: '#E2E8F0',
+  text: lightPalette.text.primary,
+  textSecondary: lightPalette.text.secondary,
+  textMuted: lightPalette.text.muted,
+  textInverse: lightPalette.text.inverse,
+  textPrimary: lightPalette.text.brand,
 
-  text: colors.text.primary,
-  textSecondary: colors.text.secondary,
-  textMuted: colors.text.muted,
-  textInverse: colors.text.inverse,
-  textPrimary: colors.text.brand,
+  border: lightPalette.border.default,
+  borderSubtle: lightPalette.border.subtle,
+  borderDark: lightPalette.border.strong,
 
-  border: colors.border.default,
-  borderSubtle: colors.border.subtle,
-  borderDark: colors.border.strong,
+  success: lightPalette.status.success,
+  successSubtle: lightPalette.status.successBackground,
+  successText: lightPalette.status.success,
 
-  success: colors.status.success,
-  successSubtle: colors.status.successBackground,
-  successText: '#15803D',
+  pending: lightPalette.status.pending,
+  pendingSubtle: lightPalette.status.pendingBackground,
+  pendingText: lightPalette.status.pending,
 
-  pending: colors.status.pending,
-  pendingSubtle: colors.status.pendingBackground,
-  pendingText: '#B45309',
+  failed: lightPalette.status.failed,
+  failedSubtle: lightPalette.status.failedBackground,
+  failedText: lightPalette.status.failed,
 
-  failed: colors.status.failed,
-  failedSubtle: colors.status.failedBackground,
-  failedText: colors.payment.fonepayText,
+  cash: lightPalette.payment.cash,
+  cashSubtle: lightPalette.payment.cashBackground,
+  cashText: lightPalette.payment.cashText,
 
-  cash: colors.payment.cash,
-  cashSubtle: colors.payment.cashBackground,
-  cashText: colors.payment.cashText,
+  fonepay: lightPalette.payment.fonepay,
+  fonepaySubtle: lightPalette.payment.fonepayBackground,
+  fonepayText: lightPalette.payment.fonepayText,
 
-  fonepay: colors.payment.fonepay,
-  fonepaySubtle: colors.payment.fonepayBackground,
-  fonepayText: colors.payment.fonepayText,
-
-  overlay: 'rgba(15, 23, 42, 0.45)',
-  cardShadow: '#0000000D',
+  overlay: lightPalette.overlay,
+  cardShadow: lightPalette.cardShadow,
 } as const;
+
+export type ColorTokens = Palette;

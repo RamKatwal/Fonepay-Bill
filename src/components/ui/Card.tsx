@@ -1,10 +1,10 @@
 import React, { useRef } from 'react';
 import { View, StyleSheet, ViewStyle, Pressable, Animated, StyleProp } from 'react-native';
-import { colors } from '@/constants/colors';
 import { spacing } from '@/constants/spacing';
 import { radius } from '@/constants/radius';
 import { shadows } from '@/constants/shadows';
 import { motion } from '@/constants/motion';
+import { makeStyles } from '@/theme';
 
 export type CardVariant = 'surface' | 'elevated' | 'flat' | 'accent' | 'outlined';
 export type CardPadding = 'none' | 'sm' | 'md' | 'lg';
@@ -26,6 +26,7 @@ export function Card({
   onPress,
   testID,
 }: CardProps) {
+  const styles = useStyles();
   const scaleAnim = useRef(new Animated.Value(1)).current;
 
   const handlePressIn = () => {
@@ -76,46 +77,44 @@ export function Card({
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((t) => ({
   base: {
     borderRadius: radius.card,
     overflow: 'hidden',
   },
 
-  // Variants: subtle borders and intentional elevation
+  // Resting surfaces use a hairline border, not a shadow.
   surface: {
-    backgroundColor: colors.background.surface,
+    backgroundColor: t.background.surface,
     borderWidth: 1,
-    borderColor: colors.border.default,
+    borderColor: t.border.subtle,
   },
   elevated: {
-    backgroundColor: colors.background.surface,
+    backgroundColor: t.background.surface,
     borderWidth: 1,
-    borderColor: colors.border.subtle,
+    borderColor: t.border.subtle,
     ...shadows.card,
   },
   flat: {
-    backgroundColor: colors.background.subtle,
-    borderWidth: 1,
-    borderColor: colors.border.subtle,
+    backgroundColor: t.background.subtle,
   },
+  // `accent` kept for API compatibility — now just a plain surface.
   accent: {
-    backgroundColor: colors.brand.muted,
+    backgroundColor: t.background.surface,
     borderWidth: 1,
-    borderColor: colors.brand.subtle,
+    borderColor: t.border.subtle,
   },
   outlined: {
     backgroundColor: 'transparent',
-    borderWidth: 1.5,
-    borderColor: colors.border.default,
+    borderWidth: 1,
+    borderColor: t.border.default,
   },
 
-  // Paddings
   padding_none: {
     padding: 0,
   },
   padding_sm: {
-    padding: spacing.sm,
+    padding: spacing.md,
   },
   padding_md: {
     padding: spacing.lg,
@@ -123,4 +122,4 @@ const styles = StyleSheet.create({
   padding_lg: {
     padding: spacing.xl,
   },
-});
+}));

@@ -8,10 +8,10 @@ import {
   ViewStyle,
   TouchableOpacity,
 } from 'react-native';
-import { colors } from '@/constants/colors';
 import { spacing } from '@/constants/spacing';
 import { radius } from '@/constants/radius';
 import { typography } from '@/constants/typography';
+import { makeStyles, useTheme } from '@/theme';
 import { Icon } from './Icon';
 
 export interface InputProps extends Omit<TextInputProps, 'style'> {
@@ -40,6 +40,8 @@ export function Input({
   editable = true,
   ...rest
 }: InputProps) {
+  const styles = useStyles();
+  const t = useTheme();
   const [isFocused, setIsFocused] = useState(false);
 
   const hasError = !!error;
@@ -68,7 +70,7 @@ export function Input({
         <TextInput
           value={value}
           editable={editable}
-          placeholderTextColor={colors.text.muted}
+          placeholderTextColor={t.text.muted}
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}
           style={[styles.input, !editable && styles.disabledText]}
@@ -81,7 +83,7 @@ export function Input({
             hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
             accessibilityRole="button"
             accessibilityLabel="Clear text">
-            <Icon name="close-circle" size={18} color={colors.text.muted} />
+            <Icon name="close-circle" size={18} color={t.text.muted} />
           </TouchableOpacity>
         ) : null}
 
@@ -90,7 +92,7 @@ export function Input({
 
       {hasError ? (
         <View style={styles.errorRow}>
-          <Icon name="alert-circle" size={14} color={colors.status.error} />
+          <Icon name="alert-circle" size={14} color={t.status.error} />
           <Text style={styles.errorText}>{error}</Text>
         </View>
       ) : helperText ? (
@@ -100,7 +102,7 @@ export function Input({
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((t) => ({
   container: {
     marginBottom: spacing.md,
   },
@@ -111,53 +113,53 @@ const styles = StyleSheet.create({
   },
   label: {
     ...typography.label,
-    color: colors.text.secondary,
+    color: t.text.secondary,
   },
   requiredAsterisk: {
-    color: colors.brand.primary,
+    color: t.text.secondary,
     fontWeight: '700',
   },
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: colors.background.surface,
-    borderWidth: 1.5,
-    borderColor: colors.border.default,
+    backgroundColor: t.background.surface,
+    borderWidth: 1,
+    borderColor: t.border.default,
     borderRadius: radius.medium,
     paddingHorizontal: spacing.md,
     minHeight: 48,
   },
   filledContainer: {
-    borderColor: colors.border.strong,
+    borderColor: t.border.default,
   },
   focused: {
-    borderColor: colors.brand.primary,
-    backgroundColor: colors.background.surface,
+    borderColor: t.border.strong,
+    backgroundColor: t.background.surface,
   },
   errorBorder: {
-    borderColor: colors.status.error,
+    borderColor: t.status.error,
   },
   disabledContainer: {
-    backgroundColor: colors.background.subtle,
-    borderColor: colors.border.subtle,
+    backgroundColor: t.background.subtle,
+    borderColor: t.border.subtle,
   },
   input: {
     flex: 1,
     ...typography.body,
-    color: colors.text.primary,
+    color: t.text.primary,
     paddingVertical: spacing.sm,
   },
   disabledText: {
-    color: colors.text.muted,
+    color: t.text.muted,
   },
   prefixText: {
     ...typography.bodyMedium,
-    color: colors.text.secondary,
+    color: t.text.secondary,
     marginRight: spacing.xs,
   },
   suffixText: {
     ...typography.caption,
-    color: colors.text.muted,
+    color: t.text.muted,
     marginLeft: spacing.xs,
   },
   errorRow: {
@@ -168,11 +170,11 @@ const styles = StyleSheet.create({
   },
   errorText: {
     ...typography.caption,
-    color: colors.status.error,
+    color: t.status.error,
   },
   helperText: {
     ...typography.caption,
-    color: colors.text.muted,
+    color: t.text.muted,
     marginTop: spacing.xs,
   },
-});
+}));

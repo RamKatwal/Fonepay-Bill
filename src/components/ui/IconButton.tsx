@@ -1,9 +1,9 @@
 import React from 'react';
 import { TouchableOpacity, StyleSheet, ViewStyle, View, Text } from 'react-native';
 import { Icon, IconName } from './Icon';
-import { Colors } from '@/constants/colors';
-import { BorderRadius, Spacing } from '@/constants/spacing';
+import { BorderRadius } from '@/constants/spacing';
 import { Typography } from '@/constants/typography';
+import { makeStyles, useTheme } from '@/theme';
 
 interface IconButtonProps {
   icon: IconName;
@@ -24,7 +24,7 @@ export function IconButton({
   onPress,
   size = 44,
   iconSize = 22,
-  color = Colors.text,
+  color,
   backgroundColor = 'transparent',
   borderColor,
   badge,
@@ -32,6 +32,9 @@ export function IconButton({
   style,
   accessibilityLabel,
 }: IconButtonProps) {
+  const styles = useStyles();
+  const t = useTheme();
+
   return (
     <TouchableOpacity
       activeOpacity={0.7}
@@ -52,7 +55,7 @@ export function IconButton({
         },
         style,
       ]}>
-      <Icon name={icon} size={iconSize} color={color} />
+      <Icon name={icon} size={iconSize} color={color ?? t.text.primary} />
       {badge !== undefined && (
         <View style={styles.badgeContainer}>
           <Text style={styles.badgeText}>{badge}</Text>
@@ -62,7 +65,7 @@ export function IconButton({
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((t) => ({
   base: {
     alignItems: 'center',
     justifyContent: 'center',
@@ -71,7 +74,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 2,
     right: 2,
-    backgroundColor: Colors.primary,
+    backgroundColor: t.brand.primary,
     borderRadius: BorderRadius.full,
     minWidth: 16,
     height: 16,
@@ -80,8 +83,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 3,
   },
   badgeText: {
-    color: Colors.textInverse,
+    color: t.text.inverse,
     fontSize: Typography.size.xxs,
     fontWeight: Typography.weight.bold,
   },
-});
+}));
