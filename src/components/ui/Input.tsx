@@ -10,7 +10,6 @@ import {
 } from 'react-native';
 import { spacing } from '@/constants/spacing';
 import { radius } from '@/constants/radius';
-import { typography } from '@/constants/typography';
 import { makeStyles, useTheme } from '@/theme';
 import { Icon } from './Icon';
 
@@ -26,20 +25,25 @@ export interface InputProps extends Omit<TextInputProps, 'style'> {
   required?: boolean;
 }
 
-export function Input({
-  label,
-  error,
-  helperText,
-  prefix,
-  suffix,
-  containerStyle,
-  inputStyle,
-  value,
-  onClear,
-  required = false,
-  editable = true,
-  ...rest
-}: InputProps) {
+export const Input = React.forwardRef<TextInput, InputProps>(function Input(
+  {
+    label,
+    error,
+    helperText,
+    prefix,
+    suffix,
+    containerStyle,
+    inputStyle,
+    value,
+    onClear,
+    required = false,
+    editable = true,
+    onFocus,
+    onBlur,
+    ...rest
+  },
+  ref
+) {
   const styles = useStyles();
   const t = useTheme();
   const [isFocused, setIsFocused] = useState(false);
@@ -68,11 +72,18 @@ export function Input({
         {prefix && <Text style={styles.prefixText}>{prefix}</Text>}
 
         <TextInput
+          ref={ref}
           value={value}
           editable={editable}
           placeholderTextColor={t.text.muted}
-          onFocus={() => setIsFocused(true)}
-          onBlur={() => setIsFocused(false)}
+          onFocus={(e) => {
+            setIsFocused(true);
+            onFocus?.(e);
+          }}
+          onBlur={(e) => {
+            setIsFocused(false);
+            onBlur?.(e);
+          }}
           style={[styles.input, !editable && styles.disabledText]}
           {...rest}
         />
@@ -100,9 +111,9 @@ export function Input({
       ) : null}
     </View>
   );
-}
+});
 
-const useStyles = makeStyles((t) => ({
+const useStyles = makeStyles((t, type) => ({
   container: {
     marginBottom: spacing.md,
   },
@@ -112,7 +123,7 @@ const useStyles = makeStyles((t) => ({
     marginBottom: spacing.xs,
   },
   label: {
-    ...typography.label,
+    ...type.label,
     color: t.text.secondary,
   },
   requiredAsterisk: {
@@ -145,7 +156,7 @@ const useStyles = makeStyles((t) => ({
   },
   input: {
     flex: 1,
-    ...typography.body,
+    ...type.body,
     color: t.text.primary,
     paddingVertical: spacing.sm,
   },
@@ -153,12 +164,12 @@ const useStyles = makeStyles((t) => ({
     color: t.text.muted,
   },
   prefixText: {
-    ...typography.bodyMedium,
+    ...type.bodyMedium,
     color: t.text.secondary,
     marginRight: spacing.xs,
   },
   suffixText: {
-    ...typography.caption,
+    ...type.caption,
     color: t.text.muted,
     marginLeft: spacing.xs,
   },
@@ -169,11 +180,11 @@ const useStyles = makeStyles((t) => ({
     marginTop: spacing.xs,
   },
   errorText: {
-    ...typography.caption,
+    ...type.caption,
     color: t.status.error,
   },
   helperText: {
-    ...typography.caption,
+    ...type.caption,
     color: t.text.muted,
     marginTop: spacing.xs,
   },

@@ -5,7 +5,6 @@ import { Card } from '@/components/ui/Card';
 import { Icon } from '@/components/ui/Icon';
 import { spacing } from '@/constants/spacing';
 import { radius } from '@/constants/radius';
-import { typography } from '@/constants/typography';
 import { makeStyles, useTheme } from '@/theme';
 
 export interface MerchantInfoCardProps {
@@ -73,7 +72,7 @@ export function MerchantInfoCard({
   );
 }
 
-const useStyles = makeStyles((t) => ({
+const useStyles = makeStyles((t, type) => ({
   sourceBanner: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -89,7 +88,7 @@ const useStyles = makeStyles((t) => ({
     gap: spacing.xs,
   },
   sourceText: {
-    ...typography.label,
+    ...type.label,
     color: t.text.secondary,
   },
   lockBadge: {
@@ -98,7 +97,7 @@ const useStyles = makeStyles((t) => ({
     gap: 3,
   },
   lockText: {
-    ...typography.caption,
+    ...type.caption,
     fontSize: 10,
     color: t.text.muted,
   },
@@ -119,7 +118,7 @@ const useStyles = makeStyles((t) => ({
     flex: 1,
   },
   businessName: {
-    ...typography.cardTitle,
+    ...type.cardTitle,
     fontSize: 16,
     color: t.text.primary,
   },
@@ -130,11 +129,11 @@ const useStyles = makeStyles((t) => ({
     marginTop: 2,
   },
   panLabel: {
-    ...typography.caption,
+    ...type.caption,
     color: t.text.muted,
   },
   panValue: {
-    ...typography.invoiceNumber,
+    ...type.invoiceNumber,
     fontSize: 12,
     color: t.text.secondary,
   },
@@ -158,12 +157,12 @@ const useStyles = makeStyles((t) => ({
     flexBasis: '100%',
   },
   metaLabel: {
-    ...typography.caption,
+    ...type.caption,
     color: t.text.muted,
     marginBottom: 2,
   },
   metaValue: {
-    ...typography.bodySmall,
+    ...type.bodySmall,
     fontWeight: '500',
     color: t.text.secondary,
   },

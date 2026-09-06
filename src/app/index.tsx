@@ -5,7 +5,6 @@ import { Card } from '@/components/ui/Card';
 import { Icon } from '@/components/ui/Icon';
 import { spacing } from '@/constants/spacing';
 import { radius } from '@/constants/radius';
-import { typography } from '@/constants/typography';
 import { makeStyles, useTheme } from '@/theme';
 import { useTransactions } from '@/hooks/useTransactions';
 
@@ -47,9 +46,9 @@ export default function FoldersScreen() {
   );
 }
 
-const useStyles = makeStyles((t) => ({
+const useStyles = makeStyles((t, type) => ({
   sectionLabel: {
-    ...typography.label,
+    ...type.label,
     color: t.text.secondary,
     marginBottom: spacing.md,
   },
@@ -73,13 +72,13 @@ const useStyles = makeStyles((t) => ({
     flex: 1,
   },
   folderName: {
-    ...typography.cardTitle,
+    ...type.cardTitle,
     fontSize: 16,
     color: t.text.primary,
     marginBottom: 2,
   },
   folderMeta: {
-    ...typography.caption,
+    ...type.caption,
     color: t.text.muted,
   },
 }));

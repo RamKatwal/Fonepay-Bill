@@ -1,7 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, ViewStyle } from 'react-native';
 import { Spacing, BorderRadius } from '@/constants/spacing';
-import { typography } from '@/constants/typography';
 import { makeStyles, useTheme } from '@/theme';
 import { Icon, IconName } from './Icon';
 import { Button } from './Button';
@@ -48,7 +47,7 @@ export function EmptyState({
   );
 }
 
-const useStyles = makeStyles((t) => ({
+const useStyles = makeStyles((t, type) => ({
   container: {
     alignItems: 'center',
     justifyContent: 'center',
@@ -65,13 +64,13 @@ const useStyles = makeStyles((t) => ({
     marginBottom: Spacing.lg,
   },
   title: {
-    ...typography.sectionTitle,
+    ...type.sectionTitle,
     color: t.text.primary,
     textAlign: 'center',
     marginBottom: Spacing.xs,
   },
   description: {
-    ...typography.body,
+    ...type.body,
     fontSize: 14,
     color: t.text.secondary,
     textAlign: 'center',

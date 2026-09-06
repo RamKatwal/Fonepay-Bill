@@ -11,7 +11,6 @@ import {
 } from 'react-native';
 import { spacing } from '@/constants/spacing';
 import { radius } from '@/constants/radius';
-import { typography } from '@/constants/typography';
 import { motion } from '@/constants/motion';
 import { makeStyles, useTheme } from '@/theme';
 
@@ -131,7 +130,7 @@ export function SecondaryButton(props: Omit<ButtonProps, 'variant'>) {
   return <Button {...props} variant="secondary" />;
 }
 
-const useStyles = makeStyles((t) => ({
+const useStyles = makeStyles((t, type) => ({
   fullWidthContainer: {
     width: '100%',
   },
@@ -215,7 +214,7 @@ const useStyles = makeStyles((t) => ({
 
   // Text
   baseText: {
-    ...typography.button,
+    ...type.button,
     textAlign: 'center',
   },
   smText: {

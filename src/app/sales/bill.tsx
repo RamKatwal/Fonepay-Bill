@@ -1,15 +1,14 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { View, Text } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useAppContext } from '@/store/AppContext';
 import { useSaleContext } from '@/store/SaleContext';
+import { useShareBill } from '@/hooks/useShareBill';
 import { Screen } from '@/components/layout/Screen';
 import { PrimaryButton } from '@/components/ui/Button';
 import { Icon } from '@/components/ui/Icon';
 import { BillPreview } from '@/components/bill/BillPreview';
-import { ShareBillModal } from '@/components/bill/ShareBillModal';
 import { Spacing } from '@/constants/spacing';
-import { typography } from '@/constants/typography';
 import { makeStyles, useTheme } from '@/theme';
 
 export default function GeneratedBillScreen() {
@@ -18,7 +17,7 @@ export default function GeneratedBillScreen() {
   const t = useTheme();
   const { merchant } = useAppContext();
   const { currentSale, resetSale } = useSaleContext();
-  const [isShareModalVisible, setIsShareModalVisible] = useState(false);
+  const { shareBill, isSharing } = useShareBill();
 
   const handleBackToDashboard = () => {
     resetSale();
@@ -36,10 +35,16 @@ export default function GeneratedBillScreen() {
       footer={
         <View style={styles.footerCol}>
           <PrimaryButton
-            title="Share"
-            onPress={() => setIsShareModalVisible(true)}
+            title={isSharing ? 'Preparing PDF…' : 'Share'}
+            onPress={() => shareBill(currentSale, merchant, true)}
+            loading={isSharing}
+            disabled={isSharing}
             size="lg"
-            leftIcon={<Icon name="share-outline" size={20} color={t.text.inverse} />}
+            leftIcon={
+              isSharing ? undefined : (
+                <Icon name="share-outline" size={20} color={t.text.inverse} />
+              )
+            }
           />
           <View style={styles.linkRow}>
             <Text onPress={handleBackToDashboard} style={styles.link}>
@@ -51,19 +56,11 @@ export default function GeneratedBillScreen() {
       <View style={styles.content}>
         <BillPreview sale={currentSale} merchant={merchant} isOfficial />
       </View>
-
-      <ShareBillModal
-        visible={isShareModalVisible}
-        onClose={() => setIsShareModalVisible(false)}
-        sale={currentSale}
-        merchant={merchant}
-        isOfficial
-      />
     </Screen>
   );
 }
 
-const useStyles = makeStyles((t) => ({
+const useStyles = makeStyles((t, type) => ({
   content: {
     paddingBottom: Spacing.xl,
   },
@@ -76,7 +73,7 @@ const useStyles = makeStyles((t) => ({
     paddingVertical: 6,
   },
   link: {
-    ...typography.bodySmall,
+    ...type.bodySmall,
     fontWeight: '600',
     color: t.text.secondary,
     textDecorationLine: 'underline',

@@ -12,7 +12,6 @@ import {
 import { Spacing } from '@/constants/spacing';
 import { radius } from '@/constants/radius';
 import { shadows } from '@/constants/shadows';
-import { typography } from '@/constants/typography';
 import { makeStyles, useTheme } from '@/theme';
 import { Icon } from './Icon';
 
@@ -60,7 +59,7 @@ export function Modal({ visible, onClose, title, children }: ModalProps) {
   );
 }
 
-const useStyles = makeStyles((t) => ({
+const useStyles = makeStyles((t, type) => ({
   overlay: {
     flex: 1,
     backgroundColor: t.overlay,
@@ -86,7 +85,7 @@ const useStyles = makeStyles((t) => ({
     marginBottom: Spacing.lg,
   },
   title: {
-    ...typography.sectionTitle,
+    ...type.sectionTitle,
     color: t.text.primary,
   },
 }));

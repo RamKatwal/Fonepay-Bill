@@ -8,7 +8,6 @@ import { Screen } from '@/components/layout/Screen';
 import { Button } from '@/components/ui/Button';
 import { Spacing } from '@/constants/spacing';
 import { radius } from '@/constants/radius';
-import { typography, Typography } from '@/constants/typography';
 import { Icon } from '@/components/ui/Icon';
 import { makeStyles, useTheme } from '@/theme';
 import { formatNPR } from '@/utils/currency';
@@ -76,9 +75,6 @@ export default function PaymentStatusScreen() {
       <View style={styles.amountBlock}>
         <Text style={styles.amountLabel}>Requesting</Text>
         <Text style={styles.amount}>{formatNPR(currentSale.netAmount)}</Text>
-        <Text style={styles.amountMeta}>
-          {currentSale.items.length === 1 ? '1 item' : `${currentSale.items.length} items`}
-        </Text>
       </View>
 
       <View style={styles.qrCard}>
@@ -136,26 +132,21 @@ export default function PaymentStatusScreen() {
   );
 }
 
-const useStyles = makeStyles((t) => ({
+const useStyles = makeStyles((t, type) => ({
   amountBlock: {
     alignItems: 'center',
     paddingTop: Spacing.sm,
     gap: 3,
   },
   amountLabel: {
-    ...typography.label,
+    ...type.label,
     color: t.text.secondary,
   },
   amount: {
-    ...typography.display,
+    ...type.display,
     fontSize: 34,
     lineHeight: 40,
     color: t.text.primary,
-  },
-  amountMeta: {
-    ...typography.invoiceNumber,
-    fontFamily: Typography.family.mono,
-    color: t.text.secondary,
   },
   qrCard: {
     alignSelf: 'center',
@@ -180,7 +171,7 @@ const useStyles = makeStyles((t) => ({
     gap: Spacing.md,
   },
   qrOverlayText: {
-    ...typography.bodyMedium,
+    ...type.bodyMedium,
     color: t.text.secondary,
   },
   paidCircle: {
@@ -200,7 +191,7 @@ const useStyles = makeStyles((t) => ({
     justifyContent: 'center',
   },
   merchantName: {
-    ...typography.caption,
+    ...type.caption,
     fontWeight: '600',
     color: t.text.secondary,
   },
@@ -217,7 +208,7 @@ const useStyles = makeStyles((t) => ({
     paddingVertical: 9,
   },
   statusText: {
-    ...typography.caption,
+    ...type.caption,
     fontWeight: '700',
   },
   pendingDot: {
@@ -227,7 +218,7 @@ const useStyles = makeStyles((t) => ({
     backgroundColor: t.status.pending,
   },
   helper: {
-    ...typography.caption,
+    ...type.caption,
     color: t.text.secondary,
     textAlign: 'center',
     lineHeight: 18,
@@ -243,7 +234,7 @@ const useStyles = makeStyles((t) => ({
     paddingVertical: 6,
   },
   link: {
-    ...typography.bodySmall,
+    ...type.bodySmall,
     fontWeight: '600',
     color: t.text.secondary,
     textDecorationLine: 'underline',

@@ -1,7 +1,6 @@
 import React from 'react';
 import { View, StyleSheet, ViewStyle, Text } from 'react-native';
 import { Spacing } from '@/constants/spacing';
-import { typography } from '@/constants/typography';
 import { makeStyles } from '@/theme';
 
 interface DividerProps {
@@ -26,7 +25,7 @@ export function Divider({ style, label, dashed }: DividerProps) {
   return <View style={[styles.line, dashed && styles.dashed, style]} />;
 }
 
-const useStyles = makeStyles((t) => ({
+const useStyles = makeStyles((t, type) => ({
   line: {
     height: 1,
     backgroundColor: t.border.subtle,
@@ -45,7 +44,7 @@ const useStyles = makeStyles((t) => ({
   },
   labelText: {
     paddingHorizontal: Spacing.md,
-    ...typography.caption,
+    ...type.caption,
     color: t.text.muted,
     fontWeight: '500',
   },

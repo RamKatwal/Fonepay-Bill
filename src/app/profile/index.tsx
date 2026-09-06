@@ -8,9 +8,16 @@ import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { Chip } from '@/components/ui/Chip';
 import { Spacing, BorderRadius } from '@/constants/spacing';
-import { typography, Typography } from '@/constants/typography';
+import { Typography } from '@/constants/typography';
 import { Icon } from '@/components/ui/Icon';
-import { makeStyles, useTheme, useThemeMode, type ThemeMode } from '@/theme';
+import {
+  makeStyles,
+  useTheme,
+  useThemeMode,
+  useAppFont,
+  familyFor,
+  type ThemeMode,
+} from '@/theme';
 import { formatPAN } from '@/utils/formatters';
 
 const APPEARANCE_OPTIONS: { key: ThemeMode; label: string }[] = [
@@ -25,6 +32,7 @@ export default function MerchantProfileScreen() {
   const t = useTheme();
   const { merchant, logout } = useAppContext();
   const { mode, setMode } = useThemeMode();
+  const { font, setFont, fonts } = useAppFont();
 
   const handleResetPrototype = () => {
     logout();
@@ -107,6 +115,22 @@ export default function MerchantProfileScreen() {
             />
           ))}
         </View>
+
+        <View style={styles.settingDivider} />
+
+        <Text style={styles.appearanceTitle}>Font</Text>
+        <View style={styles.fontRow}>
+          {fonts.map((opt) => (
+            <Chip
+              key={opt.key}
+              label={opt.label}
+              size="sm"
+              selected={font === opt.key}
+              onPress={() => setFont(opt.key)}
+              textStyle={{ fontFamily: familyFor(opt.key, font === opt.key ? 700 : 600) }}
+            />
+          ))}
+        </View>
       </Card>
 
       <View style={styles.infoBanner}>
@@ -120,7 +144,7 @@ export default function MerchantProfileScreen() {
   );
 }
 
-const useStyles = makeStyles((t) => ({
+const useStyles = makeStyles((t, type) => ({
   profileCard: {
     padding: Spacing.lg,
     marginBottom: Spacing.lg,
@@ -142,7 +166,7 @@ const useStyles = makeStyles((t) => ({
     flex: 1,
   },
   businessName: {
-    ...typography.cardTitle,
+    ...type.cardTitle,
     fontSize: 16,
     color: t.text.primary,
     marginBottom: 4,
@@ -161,7 +185,7 @@ const useStyles = makeStyles((t) => ({
     paddingVertical: 6,
   },
   fieldLabel: {
-    ...typography.caption,
+    ...type.caption,
     color: t.text.muted,
     marginBottom: 2,
   },
@@ -184,12 +208,22 @@ const useStyles = makeStyles((t) => ({
     justifyContent: 'space-between',
   },
   appearanceTitle: {
-    ...typography.label,
+    ...type.label,
     color: t.text.secondary,
     marginBottom: Spacing.md,
   },
   appearanceRow: {
     flexDirection: 'row',
+    gap: Spacing.sm,
+  },
+  settingDivider: {
+    height: 1,
+    backgroundColor: t.border.subtle,
+    marginVertical: Spacing.lg,
+  },
+  fontRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
     gap: Spacing.sm,
   },
   infoBanner: {
@@ -203,7 +237,7 @@ const useStyles = makeStyles((t) => ({
   },
   infoBannerText: {
     flex: 1,
-    ...typography.caption,
+    ...type.caption,
     color: t.text.secondary,
     lineHeight: 18,
   },

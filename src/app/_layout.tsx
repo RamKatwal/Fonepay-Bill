@@ -4,6 +4,7 @@ import { StatusBar } from 'expo-status-bar';
 import { useFonts } from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
 import { AppContextProvider } from '@/store/AppContext';
+import { ItemHistoryProvider } from '@/store/ItemHistoryContext';
 import { SaleContextProvider } from '@/store/SaleContext';
 import { ThemeProvider, useTheme, useThemeMode } from '@/theme';
 import { fontAssets } from '@/theme/fonts';
@@ -27,7 +28,6 @@ function ThemedStack() {
         <Stack.Screen name="index" />
         <Stack.Screen name="dashboard/index" />
         <Stack.Screen name="sales/index" />
-        <Stack.Screen name="sales/preview" />
         <Stack.Screen name="sales/payment" />
         <Stack.Screen name="sales/payment-status" />
         <Stack.Screen name="sales/success" />
@@ -56,9 +56,11 @@ export default function RootLayout() {
   return (
     <ThemeProvider>
       <AppContextProvider>
-        <SaleContextProvider>
-          <ThemedStack />
-        </SaleContextProvider>
+        <ItemHistoryProvider>
+          <SaleContextProvider>
+            <ThemedStack />
+          </SaleContextProvider>
+        </ItemHistoryProvider>
       </AppContextProvider>
     </ThemeProvider>
   );

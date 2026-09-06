@@ -1,13 +1,13 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { View } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
 import { useAppContext } from '@/store/AppContext';
 import { useTransactions } from '@/hooks/useTransactions';
+import { useShareBill } from '@/hooks/useShareBill';
 import { Screen } from '@/components/layout/Screen';
 import { PrimaryButton } from '@/components/ui/Button';
 import { Icon } from '@/components/ui/Icon';
 import { BillPreview } from '@/components/bill/BillPreview';
-import { ShareBillModal } from '@/components/bill/ShareBillModal';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { Spacing } from '@/constants/spacing';
 import { makeStyles, useTheme } from '@/theme';
@@ -18,7 +18,7 @@ export default function TransactionDetailScreen() {
   const t = useTheme();
   const { merchant } = useAppContext();
   const { getTransactionById } = useTransactions();
-  const [isShareModalVisible, setIsShareModalVisible] = useState(false);
+  const { shareBill, isSharing } = useShareBill();
 
   const transaction = id ? getTransactionById(id) : undefined;
 
@@ -44,23 +44,21 @@ export default function TransactionDetailScreen() {
       }}
       footer={
         <PrimaryButton
-          title="Share"
-          onPress={() => setIsShareModalVisible(true)}
+          title={isSharing ? 'Preparing PDF…' : 'Share'}
+          onPress={() => shareBill(transaction.saleDetails, merchant, true)}
+          loading={isSharing}
+          disabled={isSharing}
           size="lg"
-          leftIcon={<Icon name="share-outline" size={20} color={t.text.inverse} />}
+          leftIcon={
+            isSharing ? undefined : (
+              <Icon name="share-outline" size={20} color={t.text.inverse} />
+            )
+          }
         />
       }>
       <View style={styles.container}>
         <BillPreview sale={transaction.saleDetails} merchant={merchant} isOfficial />
       </View>
-
-      <ShareBillModal
-        visible={isShareModalVisible}
-        onClose={() => setIsShareModalVisible(false)}
-        sale={transaction.saleDetails}
-        merchant={merchant}
-        isOfficial
-      />
     </Screen>
   );
 }

@@ -6,7 +6,7 @@ import { Screen } from '@/components/layout/Screen';
 import { Button } from '@/components/ui/Button';
 import { Spacing } from '@/constants/spacing';
 import { radius } from '@/constants/radius';
-import { typography, Typography } from '@/constants/typography';
+import { Typography } from '@/constants/typography';
 import { Icon } from '@/components/ui/Icon';
 import { makeStyles, useTheme } from '@/theme';
 import { formatNPR } from '@/utils/currency';
@@ -63,7 +63,7 @@ export default function SaleSuccessScreen() {
   );
 }
 
-const useStyles = makeStyles((t) => ({
+const useStyles = makeStyles((t, type) => ({
   container: {
     flex: 1,
     alignItems: 'center',
@@ -80,12 +80,12 @@ const useStyles = makeStyles((t) => ({
     marginBottom: 4,
   },
   title: {
-    ...typography.screenTitle,
+    ...type.screenTitle,
     color: t.text.primary,
     textAlign: 'center',
   },
   subtitle: {
-    ...typography.body,
+    ...type.body,
     fontSize: 13,
     color: t.text.secondary,
     textAlign: 'center',
@@ -102,11 +102,11 @@ const useStyles = makeStyles((t) => ({
     gap: 4,
   },
   amount: {
-    ...typography.display,
+    ...type.display,
     color: t.text.primary,
   },
   meta: {
-    ...typography.invoiceNumber,
+    ...type.invoiceNumber,
     fontFamily: Typography.family.mono,
     color: t.text.secondary,
   },
@@ -119,7 +119,7 @@ const useStyles = makeStyles((t) => ({
     paddingVertical: 6,
   },
   link: {
-    ...typography.bodySmall,
+    ...type.bodySmall,
     fontWeight: '600',
     color: t.text.secondary,
     textDecorationLine: 'underline',

@@ -4,6 +4,7 @@ import { useRouter } from 'expo-router';
 import { useAppContext } from '@/store/AppContext';
 import { useSaleContext } from '@/store/SaleContext';
 import { useTransactions } from '@/hooks/useTransactions';
+import { useDashboardSummary } from '@/hooks/useDashboardSummary';
 import { Screen } from '@/components/layout/Screen';
 import { PrimaryButton } from '@/components/ui/Button';
 import { IconButton } from '@/components/ui/IconButton';
@@ -11,7 +12,6 @@ import { Icon } from '@/components/ui/Icon';
 import { SalesSummaryCard } from '@/components/sales/SalesSummaryCard';
 import { TransactionCard } from '@/components/history/TransactionCard';
 import { spacing } from '@/constants/spacing';
-import { typography } from '@/constants/typography';
 import { makeStyles, useTheme } from '@/theme';
 
 export default function DashboardScreen() {
@@ -20,7 +20,8 @@ export default function DashboardScreen() {
   const t = useTheme();
   const { merchant } = useAppContext();
   const { initNewSale } = useSaleContext();
-  const { recentTransactions, todaySummary } = useTransactions();
+  const { recentTransactions } = useTransactions();
+  const { setPeriod, summary } = useDashboardSummary();
 
   const handleCreateSales = () => {
     initNewSale();
@@ -65,10 +66,8 @@ export default function DashboardScreen() {
         />
       }>
       <SalesSummaryCard
-        totalVolume={todaySummary.totalVolume}
-        totalSalesCount={todaySummary.totalSalesCount}
-        fonepayVolume={todaySummary.fonepayVolume}
-        cashVolume={todaySummary.cashVolume}
+        summary={summary}
+        onChangePeriod={setPeriod}
         style={styles.cardSpacing}
       />
 
@@ -98,7 +97,7 @@ export default function DashboardScreen() {
   );
 }
 
-const useStyles = makeStyles((t) => ({
+const useStyles = makeStyles((t, type) => ({
   cardSpacing: {
     marginBottom: spacing.lg,
   },
@@ -110,7 +109,7 @@ const useStyles = makeStyles((t) => ({
     marginTop: spacing.xs,
   },
   sectionTitle: {
-    ...typography.sectionTitle,
+    ...type.sectionTitle,
     color: t.text.primary,
   },
   viewAllButton: {
@@ -120,7 +119,7 @@ const useStyles = makeStyles((t) => ({
     paddingVertical: spacing.xs,
   },
   viewAllText: {
-    ...typography.bodyMedium,
+    ...type.bodyMedium,
     fontWeight: '700',
     color: t.brand.primary,
     textDecorationLine: 'underline',

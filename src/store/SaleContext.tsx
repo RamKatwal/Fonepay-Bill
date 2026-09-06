@@ -25,6 +25,8 @@ interface SaleContextType {
   updateItem: (id: string, updates: Partial<{ particulars: string; quantity: number; rate: number }>) => void;
   removeItem: (id: string) => void;
   setDiscount: (discount: number) => void;
+  /** Set the invoice date (YYYY-MM-DD). Used to back-date a sale. */
+  setSaleDate: (dateISO: string) => void;
   setCustomerInfo: (name?: string, phone?: string, notes?: string) => void;
   setPaymentMode: (mode: PaymentMode) => void;
   setPaymentStatus: (status: PaymentStatus) => void;
@@ -136,6 +138,14 @@ export function SaleContextProvider({ children }: { children: React.ReactNode })
     });
   }, []);
 
+  const setSaleDate = useCallback((dateISO: string) => {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(dateISO)) return;
+    const today = getCurrentDateFormatted();
+    // Never allow a future date.
+    const invoiceDate = dateISO > today ? today : dateISO;
+    setCurrentSale((prev) => ({ ...prev, invoiceDate }));
+  }, []);
+
   const setCustomerInfo = useCallback((name?: string, phone?: string, notes?: string) => {
     setCurrentSale((prev) => ({
       ...prev,
@@ -162,8 +172,10 @@ export function SaleContextProvider({ children }: { children: React.ReactNode })
   const completeSale = useCallback((): Transaction => {
     const invoiceNumber = currentSale.invoiceNumber || generateInvoiceNumber();
     const transactionId = currentSale.transactionId || generateTransactionId();
-    const invoiceDate = getCurrentDateFormatted();
-    const invoiceTime = getCurrentTimeFormatted();
+    // Keep the sale's own date/time — it may have been back-dated on the New
+    // Sale screen — falling back to now only if somehow unset.
+    const invoiceDate = currentSale.invoiceDate || getCurrentDateFormatted();
+    const invoiceTime = currentSale.invoiceTime || getCurrentTimeFormatted();
 
     const finalizedSale: Sale = {
       ...currentSale,
@@ -206,6 +218,7 @@ export function SaleContextProvider({ children }: { children: React.ReactNode })
       updateItem,
       removeItem,
       setDiscount,
+      setSaleDate,
       setCustomerInfo,
       setPaymentMode,
       setPaymentStatus,
@@ -221,6 +234,7 @@ export function SaleContextProvider({ children }: { children: React.ReactNode })
       updateItem,
       removeItem,
       setDiscount,
+      setSaleDate,
       setCustomerInfo,
       setPaymentMode,
       setPaymentStatus,

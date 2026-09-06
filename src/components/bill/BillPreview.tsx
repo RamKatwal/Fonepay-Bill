@@ -4,8 +4,8 @@ import { Sale } from '@/types/sale';
 import { Merchant } from '@/types/merchant';
 import { Spacing } from '@/constants/spacing';
 import { radius } from '@/constants/radius';
-import { typography, Typography } from '@/constants/typography';
-import { makeStyles, useTheme } from '@/theme';
+import { Typography } from '@/constants/typography';
+import { makeStyles } from '@/theme';
 import { formatNPR } from '@/utils/currency';
 import { formatPAN } from '@/utils/formatters';
 
@@ -13,16 +13,20 @@ interface BillPreviewProps {
   sale: Sale;
   merchant: Merchant;
   isOfficial?: boolean;
+  /** Hide the invoice number meta column (e.g. estimate overlay). */
+  showInvoice?: boolean;
+  /** Hide payment method + "Generated on…" footer. */
+  showPaymentFooter?: boolean;
 }
 
-export function BillPreview({ sale, merchant, isOfficial = false }: BillPreviewProps) {
+export function BillPreview({
+  sale,
+  merchant,
+  isOfficial = false,
+  showInvoice = true,
+  showPaymentFooter = true,
+}: BillPreviewProps) {
   const styles = useStyles();
-  const t = useTheme();
-
-  const pct =
-    sale.discount > 0 && sale.subtotal > 0
-      ? Math.round((sale.discount / sale.subtotal) * 100)
-      : 0;
 
   const methodLabel =
     sale.paymentMode === 'fonepay' ? 'Fonepay QR' : sale.paymentMode === 'cash' ? 'Cash' : '—';
@@ -45,10 +49,12 @@ export function BillPreview({ sale, merchant, isOfficial = false }: BillPreviewP
         </View>
 
         <View style={styles.metaRow}>
-          <View style={styles.metaCol}>
-            <Text style={styles.metaLabel}>Invoice</Text>
-            <Text style={styles.metaMono}>{sale.invoiceNumber || '—'}</Text>
-          </View>
+          {showInvoice && (
+            <View style={styles.metaCol}>
+              <Text style={styles.metaLabel}>Invoice</Text>
+              <Text style={styles.metaMono}>{sale.invoiceNumber || '—'}</Text>
+            </View>
+          )}
           <View style={styles.metaCol}>
             <Text style={styles.metaLabel}>Date</Text>
             <Text style={styles.metaValue}>{sale.invoiceDate}</Text>
@@ -62,7 +68,7 @@ export function BillPreview({ sale, merchant, isOfficial = false }: BillPreviewP
 
       {/* Items table */}
       <View style={styles.tableHead}>
-        <Text style={[styles.th, styles.colName]}>Particulars</Text>
+        <Text style={[styles.th, styles.colName]}>Items</Text>
         <Text style={[styles.th, styles.colQty]}>Qty</Text>
         <Text style={[styles.th, styles.colRate]}>Rate</Text>
         <Text style={[styles.th, styles.colAmt]}>Amount</Text>
@@ -84,12 +90,8 @@ export function BillPreview({ sale, merchant, isOfficial = false }: BillPreviewP
         </View>
         {sale.discount > 0 && (
           <View style={styles.totalLine}>
-            <Text style={styles.totalLabel}>
-              Discount{pct > 0 ? ` (${pct}%)` : ''}
-            </Text>
-            <Text style={[styles.totalValue, { color: t.status.success }]}>
-              − {formatNPR(sale.discount)}
-            </Text>
+            <Text style={styles.totalLabel}>Discount</Text>
+            <Text style={styles.totalValue}>− {formatNPR(sale.discount)}</Text>
           </View>
         )}
         <View style={styles.totalDivider} />
@@ -105,23 +107,25 @@ export function BillPreview({ sale, merchant, isOfficial = false }: BillPreviewP
       </View>
 
       {/* Footer */}
-      <View style={styles.footer}>
-        <View style={styles.footerLeft}>
-          <Text style={styles.metaLabel}>Payment</Text>
-          <Text style={styles.methodLabel}>
-            {sale.paymentMode ? methodLabel : 'Not selected'}
-          </Text>
-          {isOfficial && sale.paymentMode === 'fonepay' && sale.transactionId ? (
-            <Text style={styles.txnMono}>Txn {sale.transactionId}</Text>
-          ) : null}
+      {showPaymentFooter && (
+        <View style={styles.footer}>
+          <View style={styles.footerLeft}>
+            <Text style={styles.metaLabel}>Payment</Text>
+            <Text style={styles.methodLabel}>
+              {sale.paymentMode ? methodLabel : 'Not selected'}
+            </Text>
+            {isOfficial && sale.paymentMode === 'fonepay' && sale.transactionId ? (
+              <Text style={styles.txnMono}>Txn {sale.transactionId}</Text>
+            ) : null}
+          </View>
+          <Text style={styles.footerNote}>Generated on Fonepay</Text>
         </View>
-        <Text style={styles.footerNote}>Generated on Fonepay Digital Bill</Text>
-      </View>
+      )}
     </View>
   );
 }
 
-const useStyles = makeStyles((t) => ({
+const useStyles = makeStyles((t, type) => ({
   card: {
     backgroundColor: t.background.surface,
     borderWidth: 1,
@@ -147,14 +151,14 @@ const useStyles = makeStyles((t) => ({
     gap: 3,
   },
   merchantName: {
-    ...typography.cardTitle,
+    ...type.cardTitle,
     fontSize: 17,
-    fontFamily: Typography.family.sansHeavy,
+    fontFamily: type.display.fontFamily,
     fontWeight: '800',
     color: t.text.primary,
   },
   merchantMeta: {
-    ...typography.caption,
+    ...type.caption,
     color: t.text.secondary,
     lineHeight: 16,
   },
@@ -162,7 +166,7 @@ const useStyles = makeStyles((t) => ({
     alignItems: 'flex-end',
   },
   docLabel: {
-    ...typography.label,
+    ...type.label,
     fontSize: 10,
     color: t.text.secondary,
     textTransform: 'uppercase',
@@ -176,19 +180,19 @@ const useStyles = makeStyles((t) => ({
     gap: 2,
   },
   metaLabel: {
-    ...typography.label,
+    ...type.label,
     fontSize: 10,
     color: t.text.muted,
     textTransform: 'uppercase',
     letterSpacing: 0.5,
   },
   metaMono: {
-    ...typography.invoiceNumber,
+    ...type.invoiceNumber,
     fontFamily: Typography.family.mono,
     color: t.text.primary,
   },
   metaValue: {
-    ...typography.caption,
+    ...type.caption,
     fontWeight: '500',
     color: t.text.primary,
   },
@@ -199,7 +203,7 @@ const useStyles = makeStyles((t) => ({
     paddingHorizontal: Spacing.lg,
   },
   th: {
-    ...typography.label,
+    ...type.label,
     fontSize: 10,
     color: t.text.secondary,
     textTransform: 'uppercase',
@@ -214,18 +218,18 @@ const useStyles = makeStyles((t) => ({
     alignItems: 'baseline',
   },
   td: {
-    ...typography.bodySmall,
+    ...type.bodySmall,
     color: t.text.secondary,
     fontVariant: ['tabular-nums'],
   },
   tdName: {
-    ...typography.bodySmall,
+    ...type.bodySmall,
     fontWeight: '500',
     color: t.text.primary,
     lineHeight: 18,
   },
   tdStrong: {
-    ...typography.bodySmall,
+    ...type.bodySmall,
     fontWeight: '600',
     color: t.text.primary,
     fontVariant: ['tabular-nums'],
@@ -256,11 +260,11 @@ const useStyles = makeStyles((t) => ({
     alignItems: 'baseline',
   },
   totalLabel: {
-    ...typography.bodySmall,
+    ...type.bodySmall,
     color: t.text.secondary,
   },
   totalValue: {
-    ...typography.bodySmall,
+    ...type.bodySmall,
     fontWeight: '500',
     color: t.text.primary,
     fontVariant: ['tabular-nums'],
@@ -271,12 +275,12 @@ const useStyles = makeStyles((t) => ({
     marginVertical: 2,
   },
   netLabel: {
-    ...typography.sectionTitle,
+    ...type.sectionTitle,
     fontSize: 14,
     color: t.text.primary,
   },
   netValue: {
-    ...typography.amountLarge,
+    ...type.amountLarge,
     fontSize: 22,
     color: t.text.primary,
   },
@@ -287,7 +291,7 @@ const useStyles = makeStyles((t) => ({
     marginTop: 4,
   },
   wordsText: {
-    ...typography.caption,
+    ...type.caption,
     fontSize: 11,
     color: t.text.secondary,
     lineHeight: 16,
@@ -309,18 +313,18 @@ const useStyles = makeStyles((t) => ({
     gap: 3,
   },
   methodLabel: {
-    ...typography.bodySmall,
+    ...type.bodySmall,
     fontWeight: '600',
     color: t.text.primary,
   },
   txnMono: {
-    ...typography.invoiceNumber,
+    ...type.invoiceNumber,
     fontFamily: Typography.family.mono,
     fontSize: 11,
     color: t.text.secondary,
   },
   footerNote: {
-    ...typography.caption,
+    ...type.caption,
     fontSize: 10,
     color: t.text.muted,
     textAlign: 'right',

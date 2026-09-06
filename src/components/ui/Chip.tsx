@@ -10,7 +10,6 @@ import {
 } from 'react-native';
 import { spacing } from '@/constants/spacing';
 import { radius } from '@/constants/radius';
-import { typography } from '@/constants/typography';
 import { motion } from '@/constants/motion';
 import { makeStyles, useTheme } from '@/theme';
 import { Icon, IconName } from './Icon';
@@ -115,7 +114,7 @@ export function Chip({
   );
 }
 
-const useStyles = makeStyles((t) => ({
+const useStyles = makeStyles((t, type) => ({
   base: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -154,7 +153,7 @@ const useStyles = makeStyles((t) => ({
     marginRight: spacing.xs,
   },
   label: {
-    ...typography.bodyMedium,
+    ...type.bodyMedium,
   },
   smLabel: {
     fontSize: 12,

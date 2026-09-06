@@ -2,7 +2,6 @@ import React, { useEffect } from 'react';
 import { Text, View } from 'react-native';
 import { usePathname, useRouter } from 'expo-router';
 import { Spacing, BorderRadius } from '@/constants/spacing';
-import { typography } from '@/constants/typography';
 import { makeStyles, useTheme } from '@/theme';
 import { Button } from '@/components/ui/Button';
 import { Icon } from '@/components/ui/Icon';
@@ -44,7 +43,7 @@ export default function NotFoundScreen() {
   );
 }
 
-const useStyles = makeStyles((t) => ({
+const useStyles = makeStyles((t, type) => ({
   container: {
     flex: 1,
     alignItems: 'center',
@@ -62,12 +61,12 @@ const useStyles = makeStyles((t) => ({
     marginBottom: Spacing.lg,
   },
   title: {
-    ...typography.sectionTitle,
+    ...type.sectionTitle,
     color: t.text.primary,
     marginBottom: Spacing.xs,
   },
   message: {
-    ...typography.body,
+    ...type.body,
     fontSize: 14,
     color: t.text.secondary,
     textAlign: 'center',

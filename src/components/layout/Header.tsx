@@ -2,7 +2,6 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ViewStyle } from 'react-native';
 import { useRouter } from 'expo-router';
 import { spacing } from '@/constants/spacing';
-import { typography } from '@/constants/typography';
 import { makeStyles, useTheme } from '@/theme';
 import { Icon } from '../ui/Icon';
 
@@ -68,7 +67,7 @@ export function Header({
   );
 }
 
-const useStyles = makeStyles((t) => ({
+const useStyles = makeStyles((t, type) => ({
   header: {
     minHeight: 56,
     backgroundColor: t.background.canvas,
@@ -102,12 +101,12 @@ const useStyles = makeStyles((t) => ({
     flex: 1,
   },
   title: {
-    ...typography.screenTitle,
+    ...type.screenTitle,
     fontSize: 19,
     color: t.text.primary,
   },
   subtitle: {
-    ...typography.caption,
+    ...type.caption,
     color: t.text.secondary,
     marginTop: 1,
   },

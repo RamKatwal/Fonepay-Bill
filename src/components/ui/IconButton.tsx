@@ -65,7 +65,7 @@ export function IconButton({
   );
 }
 
-const useStyles = makeStyles((t) => ({
+const useStyles = makeStyles((t, type) => ({
   base: {
     alignItems: 'center',
     justifyContent: 'center',

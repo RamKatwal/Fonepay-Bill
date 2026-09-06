@@ -1,12 +1,13 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, Text, TouchableOpacity, InteractionManager } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSaleContext } from '@/store/SaleContext';
 import { Screen } from '@/components/layout/Screen';
 import { Button } from '@/components/ui/Button';
+import { FonepayQrSheet } from '@/components/sales/FonepayQrSheet';
 import { Spacing, BorderRadius } from '@/constants/spacing';
 import { radius } from '@/constants/radius';
-import { typography, Typography } from '@/constants/typography';
+import { Typography } from '@/constants/typography';
 import { Icon } from '@/components/ui/Icon';
 import { makeStyles, useTheme } from '@/theme';
 import { formatNPR } from '@/utils/currency';
@@ -18,31 +19,60 @@ export default function PaymentSelectionScreen() {
   const t = useTheme();
   const { currentSale, setPaymentMode, setPaymentStatus, completeSale } = useSaleContext();
   const [selectedMode, setSelectedMode] = useState<PaymentMode>('fonepay');
+  const [qrVisible, setQrVisible] = useState(false);
 
-  const handleContinuePayment = () => {
-    if (selectedMode === 'cash') {
-      setPaymentMode('cash');
-      setPaymentStatus('paid');
-      completeSale();
-      router.replace('/sales/success');
-    } else {
-      setPaymentMode('fonepay');
-      setPaymentStatus('pending');
-      router.push('/sales/payment-status');
-    }
+  // Fonepay QR is selected by default, so its sheet should be open on arrival.
+  // Presenting a native Modal while the previous screen's sheet is still
+  // dismissing gets silently dropped (iOS especially), so wait for the push
+  // transition to settle before opening it.
+  useEffect(() => {
+    const task = InteractionManager.runAfterInteractions(() => {
+      setQrVisible((v) => v || selectedMode === 'fonepay');
+    });
+    return () => task.cancel();
+    // Run once on mount — later mode switches open/close the sheet directly.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const handleSelectCash = () => {
+    setSelectedMode('cash');
+    setQrVisible(false);
+  };
+
+  const handleSelectFonepay = () => {
+    setSelectedMode('fonepay');
+    setQrVisible(true);
+  };
+
+  const handleCashPaid = () => {
+    setPaymentMode('cash');
+    setPaymentStatus('paid');
+    completeSale();
+    router.replace('/sales/bill');
+  };
+
+  const handleFonepayPaid = () => {
+    setQrVisible(false);
+    router.replace('/sales/bill');
+  };
+
+  const handleCloseQr = () => {
+    setQrVisible(false);
+    setSelectedMode('cash');
   };
 
   const renderOption = (
     mode: PaymentMode,
     icon: 'qr-code-outline' | 'cash-outline',
     title: string,
-    description: string
+    description: string,
+    onPress: () => void
   ) => {
     const on = selectedMode === mode;
     return (
       <TouchableOpacity
         activeOpacity={0.85}
-        onPress={() => setSelectedMode(mode)}
+        onPress={onPress}
         style={[styles.option, on && styles.optionOn]}>
         <View style={[styles.optionIcon, on && styles.optionIconOn]}>
           <Icon name={icon} size={22} color={on ? t.text.inverse : t.text.secondary} />
@@ -59,39 +89,52 @@ export default function PaymentSelectionScreen() {
   };
 
   return (
-    <Screen
-      headerProps={{ title: 'Payment', showBack: true }}
-      footer={
-        <Button
-          title={selectedMode === 'cash' ? 'Mark as paid in cash' : 'Show Fonepay QR'}
-          onPress={handleContinuePayment}
-          size="lg"
-        />
-      }>
-      <View style={styles.amountBlock}>
-        <Text style={styles.amountLabel}>Amount due</Text>
-        <Text style={styles.amount}>{formatNPR(currentSale.netAmount)}</Text>
-        <Text style={styles.amountMeta}>
-          {currentSale.items.length === 1 ? '1 item' : `${currentSale.items.length} items`}
-        </Text>
-      </View>
+    <>
+      <Screen
+        headerProps={{ title: 'Payment', showBack: true }}
+        footer={
+          selectedMode === 'cash' ? (
+            <Button title="Mark as paid in cash" onPress={handleCashPaid} size="lg" />
+          ) : undefined
+        }>
+        <View style={styles.amountBlock}>
+          <Text style={styles.amountLabel}>Amount due</Text>
+          <Text style={styles.amount}>{formatNPR(currentSale.netAmount)}</Text>
+          <Text style={styles.amountMeta}>
+            {currentSale.items.length === 1 ? '1 item' : `${currentSale.items.length} items`}
+          </Text>
+        </View>
 
-      <Text style={styles.sectionTitle}>How is the customer paying?</Text>
+        <Text style={styles.sectionTitle}>How is the customer paying?</Text>
 
-      <View style={styles.options}>
-        {renderOption(
-          'fonepay',
-          'qr-code-outline',
-          'Fonepay QR',
-          'Customer scans · settles to your account'
-        )}
-        {renderOption('cash', 'cash-outline', 'Cash', 'Collected at the counter')}
-      </View>
-    </Screen>
+        <View style={styles.options}>
+          {renderOption(
+            'fonepay',
+            'qr-code-outline',
+            'Fonepay QR',
+            'Customer scans · settles to your account',
+            handleSelectFonepay
+          )}
+          {renderOption(
+            'cash',
+            'cash-outline',
+            'Cash',
+            'Collected at the counter',
+            handleSelectCash
+          )}
+        </View>
+      </Screen>
+
+      <FonepayQrSheet
+        visible={qrVisible}
+        onClose={handleCloseQr}
+        onPaid={handleFonepayPaid}
+      />
+    </>
   );
 }
 
-const useStyles = makeStyles((t) => ({
+const useStyles = makeStyles((t, type) => ({
   amountBlock: {
     alignItems: 'center',
     paddingTop: Spacing.sm,
@@ -99,22 +142,22 @@ const useStyles = makeStyles((t) => ({
     gap: 4,
   },
   amountLabel: {
-    ...typography.label,
+    ...type.label,
     color: t.text.secondary,
   },
   amount: {
-    ...typography.display,
+    ...type.display,
     fontSize: 36,
     lineHeight: 42,
     color: t.text.primary,
   },
   amountMeta: {
-    ...typography.invoiceNumber,
+    ...type.invoiceNumber,
     fontFamily: Typography.family.mono,
     color: t.text.secondary,
   },
   sectionTitle: {
-    ...typography.sectionTitle,
+    ...type.sectionTitle,
     color: t.text.primary,
     marginBottom: Spacing.md,
   },
@@ -152,11 +195,11 @@ const useStyles = makeStyles((t) => ({
     gap: 2,
   },
   optionTitle: {
-    ...typography.cardTitle,
+    ...type.cardTitle,
     color: t.text.primary,
   },
   optionDesc: {
-    ...typography.caption,
+    ...type.caption,
     color: t.text.secondary,
   },
   radio: {

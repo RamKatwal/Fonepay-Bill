@@ -39,7 +39,7 @@ function statusConfig(t: Palette): Record<
       defaultLabel: 'Failed',
       icon: 'close-circle',
     },
-    // Payment channels — neutral, differentiated by icon + label only.
+    // Payment channels — text-only chips (no icon).
     cash: {
       backgroundColor: t.background.subtle,
       textColor: t.text.secondary,
@@ -67,6 +67,9 @@ export function Badge({
   const config = statusConfig(t)[status];
   const displayLabel = label || config.defaultLabel;
   const isSm = size === 'sm';
+  // Payment-channel chips are text-only — no icons.
+  const isPaymentChannel = status === 'cash' || status === 'fonepay';
+  const renderIcon = showIcon && !isPaymentChannel;
 
   return (
     <View
@@ -76,7 +79,7 @@ export function Badge({
         isSm ? styles.smContainer : styles.mdContainer,
         style,
       ]}>
-      {showIcon && (
+      {renderIcon && (
         <View style={styles.iconContainer}>
           <Icon name={config.icon} size={isSm ? 12 : 13} color={config.textColor} />
         </View>
