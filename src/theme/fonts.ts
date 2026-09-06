@@ -33,7 +33,7 @@ import {
 
 export type Weight = 400 | 500 | 600 | 700 | 800;
 
-/** Keys for the user-selectable body typeface (Profile → Font). */
+/** Keys for the user-selectable body typeface (Settings → Font). */
 export type AppFontKey = 'jakarta' | 'inter' | 'geist' | 'figtree';
 
 interface AppFont {

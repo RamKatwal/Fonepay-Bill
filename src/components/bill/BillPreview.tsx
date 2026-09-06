@@ -44,7 +44,7 @@ export function BillPreview({
             </Text>
           </View>
           <View style={styles.headerRight}>
-            <Text style={styles.docLabel}>{isOfficial ? 'Tax Invoice' : 'Estimate'}</Text>
+            <Text style={styles.docLabel}>{isOfficial ? 'Invoice' : 'Estimate'}</Text>
           </View>
         </View>
 

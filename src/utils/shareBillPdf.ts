@@ -124,7 +124,7 @@ export function buildBillPdfHtml(
           <p class="meta">${escapeHtml(merchant.address)}</p>
           <p class="meta">PAN ${escapeHtml(formatPAN(merchant.panVatNumber))} · ${escapeHtml(merchant.contactNumber)}</p>
         </div>
-        <div class="doc-label">${isOfficial ? 'Tax Invoice' : 'Estimate'}</div>
+        <div class="doc-label">${isOfficial ? 'Invoice' : 'Estimate'}</div>
       </div>
       <div class="meta-row">
         <div>

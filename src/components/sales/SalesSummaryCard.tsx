@@ -90,7 +90,7 @@ export function SalesSummaryCard({ summary, onChangePeriod, style }: SalesSummar
     delta.pct !== null
       ? `vs ${formatNPR(delta.prevVolume)} ${delta.comparedTo}`
       : totalVolume > 0
-        ? `vs nothing ${delta.comparedTo}`
+        ? `vs ${delta.comparedTo}`
         : '';
 
   const showBreakdown = fonepayVolume !== undefined || cashVolume !== undefined;

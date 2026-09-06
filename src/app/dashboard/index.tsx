@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useAppContext } from '@/store/AppContext';
@@ -11,6 +11,7 @@ import { IconButton } from '@/components/ui/IconButton';
 import { Icon } from '@/components/ui/Icon';
 import { SalesSummaryCard } from '@/components/sales/SalesSummaryCard';
 import { TransactionCard } from '@/components/history/TransactionCard';
+import { SettingsSheet } from '@/components/settings/SettingsSheet';
 import { spacing } from '@/constants/spacing';
 import { makeStyles, useTheme } from '@/theme';
 
@@ -22,6 +23,7 @@ export default function DashboardScreen() {
   const { initNewSale } = useSaleContext();
   const { recentTransactions } = useTransactions();
   const { setPeriod, summary } = useDashboardSummary();
+  const [settingsVisible, setSettingsVisible] = useState(false);
 
   const handleCreateSales = () => {
     initNewSale();
@@ -36,10 +38,6 @@ export default function DashboardScreen() {
     router.push(`/history/${id}` as any);
   };
 
-  const handleOpenProfile = () => {
-    router.push('/profile' as any);
-  };
-
   return (
     <Screen
       headerProps={{
@@ -48,12 +46,12 @@ export default function DashboardScreen() {
         showBack: true,
         rightAction: (
           <IconButton
-            icon="person-circle-outline"
+            icon="settings-outline"
             size={40}
-            iconSize={26}
+            iconSize={24}
             color={t.text.primary}
-            onPress={handleOpenProfile}
-            accessibilityLabel="Merchant profile"
+            onPress={() => setSettingsVisible(true)}
+            accessibilityLabel="Settings"
           />
         ),
       }}
@@ -93,6 +91,11 @@ export default function DashboardScreen() {
           />
         ))}
       </View>
+
+      <SettingsSheet
+        visible={settingsVisible}
+        onClose={() => setSettingsVisible(false)}
+      />
     </Screen>
   );
 }
