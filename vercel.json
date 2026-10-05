@@ -1,0 +1,15 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": null,
+  "installCommand": "npm install",
+  "buildCommand": "expo export -p web",
+  "outputDirectory": "dist",
+  "devCommand": "expo",
+  "cleanUrls": true,
+  "rewrites": [
+    { "source": "/history/:id", "destination": "/history/[id]" },
+    { "source": "/sales/:rest+", "destination": "/sales/[...rest]" },
+    { "source": "/dashboard/:rest+", "destination": "/dashboard/[...rest]" },
+    { "source": "/profile/:rest+", "destination": "/profile/[...rest]" }
+  ]
+}
